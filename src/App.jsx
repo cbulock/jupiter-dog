@@ -1,6 +1,6 @@
 import imageList from "./imageList.json";
 
-const isDev = true;
+const isDev = false;
 
 const imagePath = ({image, width, height}) => ( isDev ? `/images/${image.fileName}` : `https://jupiter.dog/.netlify/images?url=/images/${image.fileName}&w=${width}&h=${height}`);
 
