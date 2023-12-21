@@ -1,4 +1,5 @@
 import imageList from "./imageList.json";
+import './App.css';
 
 const isDev = false;
 
@@ -24,7 +25,8 @@ const newImageSize = ({width: originalWidth, height: originalHeight}) => {
 function App() {
   return (
     <>
-      <h1>Life of Jupiter</h1>
+    <header><img src={'https://jupiter.dog/.netlify/images?url=/android-chrome-192x192.png&w=64&h=64'} width={64} height={64} /><h1>Life of Jupiter</h1></header>
+      
       {imageList.map((image) => {
         const {width, height, fileName} = image;
         const newSizes = newImageSize({width, height})
