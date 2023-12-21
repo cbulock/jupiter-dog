@@ -5,7 +5,7 @@ function App() {
     <>
       <h1>Life of Jupiter</h1>
       {imageList.map((image) => (
-        <img key={image.fileName} src={`/images/${image.fileName}`} width={300} />
+        <img key={image.fileName} src={`https://jupiter.dog/.netlify/images?url=/images/${image.fileName}&w=300`} />
       ))}
     </>
   );
