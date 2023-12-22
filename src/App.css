@@ -7,16 +7,3 @@ html {
         #e5eb35
     ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
-
-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-h1 {
-    font-family: Twinkle Star;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: #e5eb35;
-    color: #e5eb35;
-}
