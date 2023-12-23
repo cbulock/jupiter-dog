@@ -10,6 +10,7 @@ const imagePath = ({ src, width, height }) =>
 export default ({ src, width, height, lazyLoad = false, style }) => {
   return (
     <img
+      loading={lazyLoad ? "lazy" : "eager"}
       src={imagePath({ src, width, height })}
       srcset={`${imagePath({ src, width, height })}, ${imagePath({
         src,
@@ -18,7 +19,6 @@ export default ({ src, width, height, lazyLoad = false, style }) => {
       })} 2x, ${imagePath({ src, width: width * 3, height: height * 3 })} 3x`}
       width={width}
       height={height}
-      loading={lazyLoad ? "lazy" : "eager"}
       {...stylex.props(style)}
     />
   );
