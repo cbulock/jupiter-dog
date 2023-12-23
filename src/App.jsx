@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 
-import Image from "@/components/Image";
 import ImageCard from "@/components/ImageCard";
+import JupiterHead from "@/components/JupiterHead";
 import Paw from "@/components/Paw";
 import Title from "@/components/Title";
 
@@ -32,7 +32,7 @@ function App() {
     <>
       <header {...stylex.props(styles.header)}>
         <div {...stylex.props(styles.titleContainer)}>
-          <Image src={"/android-chrome-192x192.png"} width={64} height={64} />
+          <JupiterHead />
           <Title />
         </div>
         <Paw />
