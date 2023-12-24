@@ -1,6 +1,8 @@
+import { useState } from "react";
 import * as stylex from "@stylexjs/stylex";
 
 import ImageCard from "@/components/ImageCard";
+import ImageModal from "@/components/ImageModal";
 import JupiterHead from "@/components/JupiterHead";
 import Paw from "@/components/Paw";
 import Title from "@/components/Title";
@@ -13,6 +15,9 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  main: {
+    margin: 8,
   },
   imageContainer: {
     display: "flex",
@@ -27,24 +32,35 @@ const styles = stylex.create({
   },
 });
 
-function App() {
+export default () => {
+  const [modalImage, setModalImage] = useState(null);
+
+  const closeModal = () => {
+    setModalImage(null);
+  };
+
   return (
     <>
-      <header {...stylex.props(styles.header)}>
-        <div {...stylex.props(styles.titleContainer)}>
-          <JupiterHead />
-          <Title />
-        </div>
-        <Paw />
-      </header>
+      <main {...stylex.props(styles.main)}>
+        <header {...stylex.props(styles.header)}>
+          <div {...stylex.props(styles.titleContainer)}>
+            <JupiterHead />
+            <Title />
+          </div>
+          <Paw />
+        </header>
 
-      <div {...stylex.props(styles.imageContainer)}>
-        {imageList.map((imageData) => (
-          <ImageCard key={imageData.fileName} imageData={imageData} />
-        ))}
-      </div>
+        <div {...stylex.props(styles.imageContainer)}>
+          {imageList.map((imageData) => (
+            <ImageCard
+              key={imageData.fileName}
+              imageData={imageData}
+              setModalImage={setModalImage}
+            />
+          ))}
+        </div>
+      </main>
+      <ImageModal imageData={modalImage} closeModal={closeModal} />
     </>
   );
-}
-
-export default App;
+};

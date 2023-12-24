@@ -31,12 +31,15 @@ const newImageSize = ({ width: originalWidth, height: originalHeight }) => {
   return { width: Math.round(newWidth), height: Math.round(newHeight) };
 };
 
-export default ({ imageData }) => {
+export default ({ imageData, setModalImage }) => {
   const { width, height, fileName } = imageData;
   const newSizes = newImageSize({ width, height });
 
   return (
-    <div {...stylex.props(styles.imageWrapper)}>
+    <div
+      onClick={() => setModalImage(imageData)}
+      {...stylex.props(styles.imageWrapper)}
+    >
       <Image
         src={`/images/${fileName}`}
         width={newSizes.width}
