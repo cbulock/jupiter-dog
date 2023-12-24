@@ -14,10 +14,15 @@ const styles = stylex.create({
     zIndex: 1000,
   },
   modal: {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
     height: "calc(100% - 96px)",
-    width: "calc(100% - 96px)",
+    width: "fit-content",
+    maxWidth: "calc(100% - 96px)",
     background: "#FFF",
-    margin: 32,
+    // margin: 32,
     padding: 16,
     boxShadow: "10px 10px 25px 0px rgba(0,0,0,0.75)",
   },
@@ -31,8 +36,8 @@ const styles = stylex.create({
     width: "100%",
   },
   image: {
-    maxHeight: "100%",
-    maxWidth: "100%",
+    // maxHeight: "100%",
+    // maxWidth: "100%",
   },
 });
 
