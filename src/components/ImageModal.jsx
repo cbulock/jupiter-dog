@@ -22,7 +22,6 @@ const styles = stylex.create({
     width: "fit-content",
     maxWidth: "calc(100% - 96px)",
     background: "#FFF",
-    // margin: 32,
     padding: 16,
     boxShadow: "10px 10px 25px 0px rgba(0,0,0,0.75)",
   },
@@ -34,10 +33,6 @@ const styles = stylex.create({
     justifyContent: "center",
     height: "100%",
     width: "100%",
-  },
-  image: {
-    // maxHeight: "100%",
-    // maxWidth: "100%",
   },
 });
 
@@ -56,7 +51,7 @@ export default ({ imageData, closeModal }) => {
           {imageData && (
             <Image
               src={`/images/${imageData?.fileName}`}
-              style={styles.image}
+              alt="Image of Jupiter"
             />
           )}
         </div>

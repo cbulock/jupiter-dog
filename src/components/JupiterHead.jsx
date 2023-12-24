@@ -19,7 +19,7 @@ const handleClick = () => {};
 export default () => {
   return (
     <div onClick={handleClick} {...stylex.props(styles.wrapper)}>
-      <Image src={"/jupiter.png"} width={64} height={64} style={styles.image} />
+      <Image alt="Jupiter face" src={"/jupiter.png"} width={64} height={64} style={styles.image} />
     </div>
   );
 };

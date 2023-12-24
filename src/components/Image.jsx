@@ -9,7 +9,7 @@ const imagePath = ({ src, width, height }) => {
     : `https://jupiter.dog/.netlify/images?url=${src}`;
 };
 
-export default ({ src, width, height, lazyLoad = false, style }) => {
+export default ({ alt = "", src, width, height, lazyLoad = false, style }) => {
   const srcSet =
     width && height
       ? `${imagePath({ src, width, height })}, ${imagePath({
@@ -22,6 +22,7 @@ export default ({ src, width, height, lazyLoad = false, style }) => {
   return (
     <img
       loading={lazyLoad ? "lazy" : "eager"}
+      alt={alt}
       src={imagePath({ src, width, height })}
       srcSet={srcSet}
       width={width}
