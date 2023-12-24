@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { lazy, useState } from "react";
 import * as stylex from "@stylexjs/stylex";
 
 import ImageCard from "@/components/ImageCard";
 import ImageModal from "@/components/ImageModal";
 import JupiterHead from "@/components/JupiterHead";
-import Paw from "@/components/Paw";
+const Paw = lazy(() => import("@/components/Paw"));
 import Title from "@/components/Title";
 
 import imageList from "./imageList.json";
