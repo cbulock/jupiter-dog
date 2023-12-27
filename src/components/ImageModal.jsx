@@ -1,4 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
+import { useWindowSize } from "@uidotdev/usehooks";
 
 import Image from "@/components/Image";
 
@@ -6,7 +7,7 @@ const styles = stylex.create({
   backdrop: {
     background: "rgb(0 0 0 / 60%);",
     display: "none",
-    height: "100vh",
+    height: "100lvh",
     width: "100vw",
     position: "fixed",
     top: 0,
@@ -18,7 +19,8 @@ const styles = stylex.create({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    height: "calc(100% - 96px)",
+    height: "fit-content",
+    maxHeight: "calc(100% - 96px)",
     width: "fit-content",
     maxWidth: "calc(100% - 96px)",
     background: "#FFF",
@@ -40,7 +42,35 @@ const modalClick = (e) => {
   e.stopPropagation();
 };
 
+const scaleToFitWindow = ({windowWidth, windowHeight, imageWidth, imageHeight}) => {
+  let newWidth, newHeight;
+
+  // Calculate the aspect ratios
+  const windowAspectRatio = windowWidth / windowHeight;
+  const imageAspectRatio = imageWidth / imageHeight;
+
+  // Compare aspect ratios to decide whether to fit to width or height
+  if (imageAspectRatio > windowAspectRatio) {
+      // Image is wider in proportion to the window - fit to window width
+      newWidth = windowWidth;
+      newHeight = windowWidth / imageAspectRatio;
+  } else {
+      // Image is taller in proportion to the window - fit to window height
+      newHeight = windowHeight;
+      newWidth = windowHeight * imageAspectRatio;
+  }
+
+  // Ensure the image does not exceed window size
+  newWidth = Math.min(newWidth, windowWidth);
+  newHeight = Math.min(newHeight, windowHeight);
+
+  return { width: Math.round(newWidth), height: Math.round(newHeight) };
+}
+
 export default ({ imageData, closeModal }) => {
+  const windowSize = useWindowSize();
+  const imageSize = scaleToFitWindow({windowWidth:windowSize.width *.8, windowHeight: windowSize.height*.8, imageWidth: imageData?.width, imageHeight:imageData?.height})
+
   return (
     <div
       onClick={closeModal}
@@ -52,6 +82,8 @@ export default ({ imageData, closeModal }) => {
             <Image
               src={`/images/${imageData?.fileName}`}
               alt="Image of Jupiter"
+              height={imageSize.height}
+              width={imageSize.width}
             />
           )}
         </div>
