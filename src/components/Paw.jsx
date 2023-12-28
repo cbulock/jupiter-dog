@@ -11,10 +11,14 @@ const styles = stylex.create({
     ":active": {
       transform: "scale(0.95)",
     },
+    ":hover svg": {
+        color: "#255381",
+    },
   },
   svg: {
     transform: "rotate(30deg)",
     color: "#153a5e",
+    transition: "color 0.5s",
   },
 });
 
