@@ -31,7 +31,7 @@ const newImageSize = ({ width: originalWidth, height: originalHeight }) => {
   return { width: Math.round(newWidth), height: Math.round(newHeight) };
 };
 
-export default ({ imageData, setModalImage }) => {
+export default ({ imageData, lazyLoad = true, setModalImage }) => {
   const { width, height, fileName } = imageData;
   const newSizes = newImageSize({ width, height });
 
@@ -44,7 +44,7 @@ export default ({ imageData, setModalImage }) => {
         src={`/images/${fileName}`}
         width={newSizes.width}
         height={newSizes.height}
-        lazyLoad={true}
+        lazyLoad={lazyLoad}
         style={styles.image}
       />
     </div>

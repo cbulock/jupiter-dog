@@ -51,11 +51,12 @@ export default () => {
         </header>
 
         <div {...stylex.props(styles.imageContainer)}>
-          {imageList.map((imageData) => (
+          {imageList.map((imageData, index) => (
             <ImageCard
               key={imageData.fileName}
               imageData={imageData}
               setModalImage={setModalImage}
+              lazyLoad={index > 7}
             />
           ))}
         </div>
