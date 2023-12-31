@@ -5,8 +5,8 @@ const isDev = import.meta.env.DEV;
 const imagePath = ({ src, width, height }) => {
   if (isDev) return src;
   return width && height
-    ? `/images-cdn/?url=${src}&w=${width}&h=${height}`
-    : `/images-cdn/?url=${src}`;
+    ? `/cdn/images?url=${src}&w=${width}&h=${height}`
+    : `/cdn/images?url=${src}`;
 };
 
 export default ({ alt = "", src, width, height, lazyLoad = false, style }) => {
