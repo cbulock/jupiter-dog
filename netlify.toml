@@ -1,5 +1,0 @@
-[[redirects]]
-  from = "/images-cdn/:url*"
-  to = "/.netlify/images?url=:url&:splat"
-  status = 200
-  query = {url = ":url", w = ":w", h = ":h"}
