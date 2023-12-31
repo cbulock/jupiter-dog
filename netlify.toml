@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/images-cdn/*"
+  to = "/.netlify/images:splat"
+  status = 200

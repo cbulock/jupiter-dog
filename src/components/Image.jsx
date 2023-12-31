@@ -5,8 +5,8 @@ const isDev = import.meta.env.DEV;
 const imagePath = ({ src, width, height }) => {
   if (isDev) return src;
   return width && height
-    ? `https://jupiter.dog/.netlify/images?url=${src}&w=${width}&h=${height}`
-    : `https://jupiter.dog/.netlify/images?url=${src}`;
+    ? `/images-cdn/?url=${src}&w=${width}&h=${height}`
+    : `/images-cdn/?url=${src}`;
 };
 
 export default ({ alt = "", src, width, height, lazyLoad = false, style }) => {
