@@ -15,8 +15,7 @@
     "dayjs": "^1.11.10",
     "netlify-cms": "^2.10.192",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.21.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@stylexjs/eslint-plugin": "^0.3.0",
