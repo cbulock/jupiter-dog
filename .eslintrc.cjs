@@ -16,6 +16,6 @@ module.exports = {
       "warn",
       { allowConstantExport: true },
     ],
-    "@stylexjs/valid-styles": ["error", { ...options }],
+    "@stylexjs/valid-styles": ["error"],
   },
 };

@@ -1,0 +1,11 @@
+backend:
+  name: git-gateway
+  branch: main
+media_folder: "public/images/"
+collections:
+ - name: "images"
+   label: "Images"
+   folder: "_posts/images"
+   create: false
+   fields:
+   - {label: "Layout", name: "layout", widget: "hidden", default: "blog"}
