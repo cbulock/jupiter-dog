@@ -8,6 +8,12 @@ const styles = stylex.create({
     margin: 16,
     padding: 16,
     background: "#FFF",
+    transition: "transform 0.1s ease, box-shadow 0.1s ease",
+    ":hover": {
+      cursor: "pointer",
+      transform: "scale(1.05)",
+      boxShadow: "8px 8px 20px 0px rgba(0,0,0,0.75)",
+    },
   },
   image: {
     borderRadius: 4,
