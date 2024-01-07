@@ -7,7 +7,7 @@ const styles = stylex.create({
     height: "fit-content",
     margin: 16,
     padding: 16,
-    background: "#FFF",
+    background: "var(--light-color)",
     transition: "transform 0.1s ease, box-shadow 0.1s ease",
     ":hover": {
       cursor: "pointer",

@@ -1,14 +1,22 @@
+:root {
+  /* palette from https://coolors.co/fcab10-d81159-dbd5b5-218380 */
+
+  --orange-web: #fcab10ff;
+  --raspberry: #d81159ff;
+  --pearl: #dbd5b5ff;
+  --teal: #218380ff;
+
+  --primary-color: var(--raspberry);
+  --secondary-color: var(--orange-web);
+  --light-color: var(--pearl);
+  --background-color: var(--teal);
+}
+
 html {
-    scrollbar-gutter: stable;
-    margin: 0;
-    background: #e5eb35; /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #db36a4, #e5eb35); /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(
-        to right,
-        #db36a4,
-        #e5eb35
-    ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  scrollbar-gutter: stable;
+  margin: 0;
+  background: var(--background-color);
 }
 body {
-    margin: 0;
+  margin: 0;
 }

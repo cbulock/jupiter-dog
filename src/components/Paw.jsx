@@ -12,13 +12,13 @@ const styles = stylex.create({
       transform: "scale(0.95)",
     },
     ":hover svg": {
-        color: "#255381",
+      filter: "brightness(120%)",
     },
   },
   svg: {
     transform: "rotate(30deg)",
-    color: "#153a5e",
-    transition: "color 0.5s",
+    color: "var(--secondary-color)",
+    transition: "filter 0.5s",
   },
 });
 

@@ -23,7 +23,7 @@ const styles = stylex.create({
     maxHeight: "calc(100% - 96px)",
     width: "fit-content",
     maxWidth: "calc(100% - 96px)",
-    background: "#FFF",
+    background: "var(--light-color)",
     padding: 16,
     boxShadow: "10px 10px 25px 0px rgba(0,0,0,0.75)",
   },
