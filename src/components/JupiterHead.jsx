@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { signal } from "@preact/signals-react";
 
 import * as stylex from "@stylexjs/stylex";
 import Facts from "@/components/Facts";
@@ -23,24 +23,22 @@ const styles = stylex.create({
   },
 });
 
-export default () => {
-  const [showFacts, setShowFacts] = useState(false);
+const showFacts = signal(false);
 
-  return (
-    <div {...stylex.props(styles.wrapper)}>
-      <div
-        onClick={() => setShowFacts(!showFacts)}
-        {...stylex.props(styles.imagewrapper)}
-      >
-        <Image
-          alt="Jupiter face"
-          src={"/jupiter.png"}
-          width={64}
-          height={64}
-          style={styles.image}
-        />
-      </div>
-      <Facts isOpen={showFacts} />
+export default () => (
+  <div {...stylex.props(styles.wrapper)}>
+    <div
+      onClick={() => showFacts.value = !showFacts.value}
+      {...stylex.props(styles.imagewrapper)}
+    >
+      <Image
+        alt="Jupiter face"
+        src={"/jupiter.png"}
+        width={64}
+        height={64}
+        style={styles.image}
+      />
     </div>
-  );
-};
+    <Facts isOpen={showFacts.value} />
+  </div>
+);

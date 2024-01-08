@@ -19,6 +19,7 @@ const config = {
         },
       },
     ],
+    ["module:@preact/signals-react-transform"],
   ],
 };
 
