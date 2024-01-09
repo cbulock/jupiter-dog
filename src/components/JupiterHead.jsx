@@ -1,8 +1,7 @@
-import { signal } from "@preact/signals-react";
-
 import * as stylex from "@stylexjs/stylex";
 import Facts from "@/components/Facts";
 import Image from "@/components/Image";
+import { isShowingFacts } from "@/state";
 
 const styles = stylex.create({
   wrapper: {
@@ -23,12 +22,10 @@ const styles = stylex.create({
   },
 });
 
-const showFacts = signal(false);
-
 export default () => (
   <div {...stylex.props(styles.wrapper)}>
     <div
-      onClick={() => showFacts.value = !showFacts.value}
+      onClick={() => (isShowingFacts.value = !isShowingFacts.value)}
       {...stylex.props(styles.imagewrapper)}
     >
       <Image
@@ -39,6 +36,6 @@ export default () => (
         style={styles.image}
       />
     </div>
-    <Facts isOpen={showFacts.value} />
+    <Facts isOpen={isShowingFacts.value} />
   </div>
 );

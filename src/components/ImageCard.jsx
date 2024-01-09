@@ -1,6 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 
 import Image from "@/components/Image";
+import { modalImage } from "@/state";
 
 const styles = stylex.create({
   imageWrapper: {
@@ -37,13 +38,13 @@ const newImageSize = ({ width: originalWidth, height: originalHeight }) => {
   return { width: Math.round(newWidth), height: Math.round(newHeight) };
 };
 
-export default ({ imageData, lazyLoad = true, setModalImage }) => {
+export default ({ imageData, lazyLoad = true }) => {
   const { width, height, fileName } = imageData;
   const newSizes = newImageSize({ width, height });
 
   return (
     <div
-      onClick={() => setModalImage(imageData)}
+      onClick={() => (modalImage.value = imageData)}
       {...stylex.props(styles.imageWrapper)}
     >
       <Image

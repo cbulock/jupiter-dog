@@ -57,7 +57,7 @@ export default ({ isOpen = false, closeModal }) => {
         <ul>
           <li>Born June 27, 2018</li>
           <li>30 Pounds</li>
-          <li>Gottcha Day: Sept 1, 2018</li>
+          <li>Gotcha Day: Sept 1, 2018</li>
           <li>Breed</li>
         </ul>
       </div>

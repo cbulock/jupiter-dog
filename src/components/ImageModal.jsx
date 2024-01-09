@@ -2,6 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useWindowSize } from "@uidotdev/usehooks";
 
 import Image from "@/components/Image";
+import { modalImage } from "@/state";
 
 const styles = stylex.create({
   backdrop: {
@@ -42,7 +43,12 @@ const modalClick = (e) => {
   e.stopPropagation();
 };
 
-const scaleToFitWindow = ({windowWidth, windowHeight, imageWidth, imageHeight}) => {
+const scaleToFitWindow = ({
+  windowWidth,
+  windowHeight,
+  imageWidth,
+  imageHeight,
+}) => {
   let newWidth, newHeight;
 
   // Calculate the aspect ratios
@@ -51,13 +57,13 @@ const scaleToFitWindow = ({windowWidth, windowHeight, imageWidth, imageHeight}) 
 
   // Compare aspect ratios to decide whether to fit to width or height
   if (imageAspectRatio > windowAspectRatio) {
-      // Image is wider in proportion to the window - fit to window width
-      newWidth = windowWidth;
-      newHeight = windowWidth / imageAspectRatio;
+    // Image is wider in proportion to the window - fit to window width
+    newWidth = windowWidth;
+    newHeight = windowWidth / imageAspectRatio;
   } else {
-      // Image is taller in proportion to the window - fit to window height
-      newHeight = windowHeight;
-      newWidth = windowHeight * imageAspectRatio;
+    // Image is taller in proportion to the window - fit to window height
+    newHeight = windowHeight;
+    newWidth = windowHeight * imageAspectRatio;
   }
 
   // Ensure the image does not exceed window size
@@ -65,22 +71,27 @@ const scaleToFitWindow = ({windowWidth, windowHeight, imageWidth, imageHeight}) 
   newHeight = Math.min(newHeight, windowHeight);
 
   return { width: Math.round(newWidth), height: Math.round(newHeight) };
-}
+};
 
-export default ({ imageData, closeModal }) => {
+export default () => {
   const windowSize = useWindowSize();
-  const imageSize = scaleToFitWindow({windowWidth:windowSize.width *.8, windowHeight: windowSize.height*.8, imageWidth: imageData?.width, imageHeight:imageData?.height})
+  const imageSize = scaleToFitWindow({
+    windowWidth: windowSize.width * 0.8,
+    windowHeight: windowSize.height * 0.8,
+    imageWidth: modalImage.value?.width,
+    imageHeight: modalImage.value?.height,
+  });
 
   return (
     <div
-      onClick={closeModal}
-      {...stylex.props(styles.backdrop, imageData && styles.open)}
+      onClick={() => (modalImage.value = null)}
+      {...stylex.props(styles.backdrop, modalImage.value && styles.open)}
     >
       <div onClick={modalClick} {...stylex.props(styles.modal)}>
         <div {...stylex.props(styles.modalContents)}>
-          {imageData && (
+          {modalImage.value && (
             <Image
-              src={`/images/${imageData?.fileName}`}
+              src={`/images/${modalImage.value?.fileName}`}
               alt="Image of Jupiter"
               height={imageSize.height}
               width={imageSize.width}
