@@ -13,6 +13,7 @@
     "@preact/signals-react": "^2.0.0",
     "@stylexjs/stylex": "^0.3.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "blurhash": "^2.0.5",
     "dayjs": "^1.11.10",
     "netlify-cms": "^2.10.192",
     "react": "^18.2.0",
@@ -32,6 +33,7 @@
     "exif-parser": "^0.1.12",
     "image-size": "^1.0.2",
     "probe-image-size": "^7.2.3",
+    "sharp": "^0.33.2",
     "vite": "^5.0.8",
     "vite-plugin-svgr": "^4.2.0"
   }

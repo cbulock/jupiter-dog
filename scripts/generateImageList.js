@@ -3,6 +3,8 @@ import path from 'path';
 import exifParser from 'exif-parser';
 import dayjs from 'dayjs';
 import probe from 'probe-image-size';
+import sharp from "sharp";
+import { encode } from "blurhash";
 
 async function getEXIFData(filePath) {
   try {
@@ -34,6 +36,17 @@ async function getImageDimensions(filePath, orientation) {
   }
 }
 
+async function getBlurhash(filePath, dimensions) {
+  try {
+    const processingReduction = 8;
+    const newDimensions = { width: Math.round(dimensions.width / processingReduction), height: Math.round(dimensions.height / processingReduction) }
+    const buffer = await sharp(filePath).raw().ensureAlpha().resize(newDimensions.width, newDimensions.height).toBuffer();
+    return encode(new Uint8ClampedArray(buffer), newDimensions.width, newDimensions.height, 4, 4);
+  } catch (error) {
+    console.error(`Error getting blurhash for ${filePath}:`, error.message);
+  }
+}
+
 const imagesDirectory = path.join(process.cwd(), 'public', 'images');
 
 async function generateImageList() {
@@ -50,8 +63,9 @@ async function generateImageList() {
           const createdDate = dayjs.unix(exifData.DateTimeOriginal).toISOString();
           const orientation = exifData.Orientation || 1; // Default orientation is 1
           const dimensions = await getImageDimensions(filePath, orientation);
+          const blurhash = await getBlurhash(filePath, dimensions);
 
-          imageFiles.push({ fileName: file, exifData, createdDate, ...dimensions });
+          imageFiles.push({ blurhash, fileName: file, exifData, createdDate, ...dimensions });
         }
       }
     }
