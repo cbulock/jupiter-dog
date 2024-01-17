@@ -1,4 +1,4 @@
-import { promises as fs, createReadStream } from 'fs';
+import { promises as fs, createReadStream, existsSync } from 'fs';
 import path from 'path';
 import exifParser from 'exif-parser';
 import dayjs from 'dayjs';
@@ -48,6 +48,7 @@ async function getBlurhash(filePath, dimensions) {
 }
 
 const imagesDirectory = path.join(process.cwd(), 'public', 'images');
+const metadataDirectory = path.join(process.cwd(), 'public', 'images', 'metadata');
 
 async function generateImageList() {
   try {
@@ -56,16 +57,30 @@ async function generateImageList() {
 
     for (const file of files) {
       if (/\.(jpg|jpeg|png)$/.test(file)) {
-        const filePath = path.join(imagesDirectory, file);
-        const exifData = await getEXIFData(filePath);
+        const metadataPath = path.join(metadataDirectory, `${file}.json`);
 
-        if (exifData?.DateTimeOriginal) {
-          const createdDate = dayjs.unix(exifData.DateTimeOriginal).toISOString();
-          const orientation = exifData.Orientation || 1; // Default orientation is 1
-          const dimensions = await getImageDimensions(filePath, orientation);
-          const blurhash = await getBlurhash(filePath, dimensions);
+        let metadata;
 
-          imageFiles.push({ blurhash, fileName: file, exifData, createdDate, ...dimensions });
+        if (existsSync(metadataPath)) {
+          const metadataFile = await fs.readFile(metadataPath);
+          metadata = JSON.parse(metadataFile);
+        } else {
+          const filePath = path.join(imagesDirectory, file);
+          const exifData = await getEXIFData(filePath);
+
+          if (exifData?.DateTimeOriginal) {
+            const createdDate = dayjs.unix(exifData.DateTimeOriginal).toISOString();
+            const orientation = exifData.Orientation || 1; // Default orientation is 1
+            const dimensions = await getImageDimensions(filePath, orientation);
+            const blurhash = await getBlurhash(filePath, dimensions);
+
+            metadata = { blurhash, fileName: file, exifData, createdDate, ...dimensions };
+            await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+          }
+        }
+        if (metadata) {
+          const { exifData, ...metadataWithoutExif } = metadata;
+          imageFiles.push(metadataWithoutExif);
         }
       }
     }
