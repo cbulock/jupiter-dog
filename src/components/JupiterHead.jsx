@@ -1,11 +1,15 @@
 import * as stylex from "@stylexjs/stylex";
 import Facts from "@/components/Facts";
 import Image from "@/components/Image";
-import { isShowingFacts } from "@/state";
+import { isShowingFacts, scaleTitlebar } from "@/state";
 
 const styles = stylex.create({
   wrapper: {
     position: "relative",
+  },
+  smaller: {
+    transform: "scale(0.7)",
+    transformOrigin: "right",
   },
   imagewrapper: {
     cursor: "url('paw.svg'), auto",
@@ -26,7 +30,10 @@ export default () => (
   <div {...stylex.props(styles.wrapper)}>
     <div
       onClick={() => (isShowingFacts.value = !isShowingFacts.value)}
-      {...stylex.props(styles.imagewrapper)}
+      {...stylex.props(
+        styles.imagewrapper,
+        scaleTitlebar.value && styles.smaller
+      )}
     >
       <Image
         alt="Jupiter face"

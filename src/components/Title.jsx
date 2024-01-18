@@ -1,4 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
+import { scaleTitlebar } from "@/state";
 
 const styles = stylex.create({
   title: {
@@ -7,8 +8,17 @@ const styles = stylex.create({
     "-webkit-text-stroke-color": "var(--secondary-color)",
     color: "var(--secondary-color)",
   },
+  smaller: {
+    transform: "scale(0.7)",
+    transformOrigin: "left",
+  },
 });
 
 export default () => (
-  <h1 {...stylex.props(styles.title)}>Life of Jupiter</h1>
+  <h1
+    className={`scale-${scaleTitlebar.value}`}
+    {...stylex.props(styles.title, scaleTitlebar.value && styles.smaller)}
+  >
+    Life of Jupiter
+  </h1>
 );

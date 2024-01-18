@@ -1,4 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
+import { scaleTitlebar } from "@/state";
 import PawImage from "@/assets/paw.svg?react";
 
 const styles = stylex.create({
@@ -7,13 +8,16 @@ const styles = stylex.create({
     width: 48,
     padding: 16,
     cursor: "url('paw.svg'), auto",
-    transition: "transform 0.1s ease",
     ":active": {
       transform: "scale(0.95)",
     },
     ":hover svg": {
       filter: "brightness(120%)",
     },
+  },
+  smaller: {
+    transform: "scale(0.7)",
+    transformOrigin: "right",
   },
   svg: {
     transform: "rotate(30deg)",
@@ -28,10 +32,12 @@ const handleClick = () => {
   bark.play();
 };
 
-export default () => {
-  return (
-    <div onClick={handleClick} {...stylex.props(styles.wrapper)}>
-      <PawImage {...stylex.props(styles.svg)} />
-    </div>
-  );
-};
+export default () => (
+  <div
+    onClick={handleClick}
+    className={`scale-${scaleTitlebar.value}`}
+    {...stylex.props(styles.wrapper, scaleTitlebar.value && styles.smaller)}
+  >
+    <PawImage {...stylex.props(styles.svg)} />
+  </div>
+);

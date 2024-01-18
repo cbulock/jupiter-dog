@@ -13,6 +13,10 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    position: "sticky",
+    top: 8,
+    left: 0,
+    zIndex: 2,
   },
   main: {
     margin: 8,
