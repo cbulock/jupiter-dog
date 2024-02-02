@@ -39,7 +39,7 @@ const newImageSize = ({ width: originalWidth, height: originalHeight }) => {
 };
 
 export default ({ imageData, lazyLoad = true }) => {
-  const { width, height, fileName } = imageData;
+  const { blurhash, width, height, fileName } = imageData;
   const newSizes = newImageSize({ width, height });
 
   return (
@@ -49,6 +49,7 @@ export default ({ imageData, lazyLoad = true }) => {
     >
       <Image
         src={`/images/${fileName}`}
+        blurhash={blurhash}
         width={newSizes.width}
         height={newSizes.height}
         lazyLoad={lazyLoad}

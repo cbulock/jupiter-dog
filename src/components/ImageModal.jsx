@@ -93,6 +93,7 @@ export default () => {
             <Image
               src={`/images/${modalImage.value?.fileName}`}
               alt="Image of Jupiter"
+              blurhash={modalImage.value?.blurhash}
               height={imageSize.height}
               width={imageSize.width}
             />
