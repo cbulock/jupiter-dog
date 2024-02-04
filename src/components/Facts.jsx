@@ -1,4 +1,36 @@
 import * as stylex from "@stylexjs/stylex";
+import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js";
+import { Pie } from "react-chartjs-2";
+
+ChartJS.register(ArcElement, Tooltip);
+
+const breedData = {
+  labels: ["Beagle", "Chihuahua", "Rat Terrier", "Supermutt"],
+  datasets: [
+    {
+      label: "Breed",
+      data: [47.2, 34.8, 9.8, 8.2],
+      backgroundColor: [
+        "rgb(255, 99, 132)",
+        "rgb(54, 162, 235)",
+        "rgb(255, 205, 86)",
+        "purple",
+      ],
+    },
+  ],
+};
+
+const breedOptions = {
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          return `${context.formattedValue}%`;
+        },
+      },
+    },
+  },
+};
 
 const styles = stylex.create({
   modal: {
@@ -10,7 +42,7 @@ const styles = stylex.create({
     padding: 32,
     background: "var(--raspberry)",
     fontSize: "2rem",
-    borderRadius: '12px',
+    borderRadius: "12px",
     boxShadow: "5px 5px 30px 0px rgba(0,0,0,0.75)",
   },
   open: {
@@ -26,15 +58,15 @@ const styles = stylex.create({
     color: "var(--secondary-color)",
   },
   triangle: {
-    position: 'absolute',
-    top: '-20px',
-    left: '-10px',
-    transform: 'rotate(320deg)',
+    position: "absolute",
+    top: "-20px",
+    left: "-10px",
+    transform: "rotate(320deg)",
     width: 0,
     height: 0,
-    "border-left": '15px solid transparent', // this seems like a styleX bug, can't used borderLeft
-    borderRight: '15px solid transparent',
-    borderBottom: '40px solid var(--raspberry)',
+    "border-left": "15px solid transparent", // this seems like a styleX bug, can't used borderLeft
+    borderRight: "15px solid transparent",
+    borderBottom: "40px solid var(--raspberry)",
   },
   header: {
     fontWeight: 800,
@@ -60,6 +92,7 @@ export default ({ isOpen = false, closeModal }) => {
           <li>Gotcha Day: Sept 1, 2018</li>
           <li>Breed</li>
         </ul>
+        <Pie data={breedData} options={breedOptions} />
       </div>
     </div>
   );

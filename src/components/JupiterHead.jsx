@@ -4,13 +4,6 @@ import Image from "@/components/Image";
 import { isShowingFacts, scaleTitlebar } from "@/state";
 
 const styles = stylex.create({
-  wrapper: {
-    position: "relative",
-  },
-  smaller: {
-    transform: "scale(0.7)",
-    transformOrigin: "right",
-  },
   imagewrapper: {
     cursor: "url('paw.svg'), auto",
     transition: "transform 0.1s ease, filter 0.3s ease",
@@ -27,13 +20,10 @@ const styles = stylex.create({
 });
 
 export default () => (
-  <div {...stylex.props(styles.wrapper)}>
+  <>
     <div
       onClick={() => (isShowingFacts.value = !isShowingFacts.value)}
-      {...stylex.props(
-        styles.imagewrapper,
-        scaleTitlebar.value && styles.smaller
-      )}
+      {...stylex.props(styles.imagewrapper)}
     >
       <Image
         alt="Jupiter face"
@@ -44,5 +34,5 @@ export default () => (
       />
     </div>
     <Facts isOpen={isShowingFacts.value} />
-  </div>
+  </>
 );

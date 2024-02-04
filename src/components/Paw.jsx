@@ -15,10 +15,6 @@ const styles = stylex.create({
       filter: "brightness(120%)",
     },
   },
-  smaller: {
-    transform: "scale(0.7)",
-    transformOrigin: "right",
-  },
   svg: {
     transform: "rotate(30deg)",
     color: "var(--secondary-color)",
@@ -36,7 +32,7 @@ export default () => (
   <div
     onClick={handleClick}
     className={`scale-${scaleTitlebar.value}`}
-    {...stylex.props(styles.wrapper, scaleTitlebar.value && styles.smaller)}
+    {...stylex.props(styles.wrapper)}
   >
     <PawImage {...stylex.props(styles.svg)} />
   </div>

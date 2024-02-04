@@ -2,9 +2,9 @@
   /* palette from https://coolors.co/fcab10-d81159-dbd5b5-218380 */
 
   --orange-web: #fcab10ff;
-  --raspberry: #d81159ff;
+  --raspberry: rgb(113, 7, 46);
   --pearl: #dbd5b5ff;
-  --teal: #218380ff;
+  --teal: rgb(3, 68, 65);
 
   --primary-color: var(--raspberry);
   --secondary-color: var(--orange-web);
