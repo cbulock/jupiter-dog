@@ -1,15 +1,15 @@
 import * as stylex from "@stylexjs/stylex";
-import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js";
+import { Chart as ChartJS, ArcElement, Legend, Tooltip } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
-ChartJS.register(ArcElement, Tooltip);
+ChartJS.register(ArcElement, Legend, Tooltip);
 
 const breedData = {
   labels: ["Beagle", "Chihuahua", "Rat Terrier", "Supermutt"],
   datasets: [
     {
       label: "Breed",
-      data: [47.2, 34.8, 9.8, 8.2],
+      data: [47, 35, 10, 8],
       backgroundColor: [
         "rgb(255, 99, 132)",
         "rgb(54, 162, 235)",
@@ -22,10 +22,15 @@ const breedData = {
 
 const breedOptions = {
   plugins: {
+    legend: {
+      labels: {
+        color: '#fcab10ff'
+      }
+    },
     tooltip: {
       callbacks: {
         label: function (context) {
-          return `${context.formattedValue}%`;
+          return ` ${context.formattedValue}%`;
         },
       },
     },
@@ -53,7 +58,7 @@ const styles = stylex.create({
     flexDirection: "column",
     justifyContent: "center",
     height: "100%",
-    width: "calc(90vw - 150px)",
+    maxWidth: "calc(90vw - 150px)",
     fontFamily: "Merriweather Sans, sans-serif",
     color: "var(--secondary-color)",
   },
@@ -70,6 +75,10 @@ const styles = stylex.create({
   },
   header: {
     fontWeight: 800,
+  },
+  breedChart: {
+    width: "30vw",
+    height: "30vw",
   },
 });
 
@@ -88,11 +97,12 @@ export default ({ isOpen = false, closeModal }) => {
         <h3 {...stylex.props(styles.header)}>Jupiter Facts</h3>
         <ul>
           <li>Born June 27, 2018</li>
-          <li>30 Pounds</li>
           <li>Gotcha Day: Sept 1, 2018</li>
-          <li>Breed</li>
+          <li>30 Pounds</li>
         </ul>
-        <Pie data={breedData} options={breedOptions} />
+        <div {...stylex.props(styles.breedChart)}>
+          <Pie data={breedData} options={breedOptions} />
+        </div>
       </div>
     </div>
   );
