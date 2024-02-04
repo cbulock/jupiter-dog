@@ -13,7 +13,6 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    // position: "sticky",
     top: 8,
     left: 0,
     zIndex: 2,
@@ -34,7 +33,7 @@ const styles = stylex.create({
   },
 });
 
-export default () => (
+const Home = () => (
   <main {...stylex.props(styles.main)}>
     <header {...stylex.props(styles.header)}>
       <div {...stylex.props(styles.titleContainer)}>
@@ -55,3 +54,5 @@ export default () => (
     </div>
   </main>
 );
+
+export default Home;

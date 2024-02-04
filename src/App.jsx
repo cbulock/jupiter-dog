@@ -5,10 +5,14 @@ import ScrollHandler from "@/components/ScrollHandler";
 
 import "./App.css";
 
-export default () => (
-  <KeyboardHandler>
+const App = () => (
+  <>
     <ScrollHandler />
-    <Home />
-    <ImageModal />
-  </KeyboardHandler>
+    <KeyboardHandler>
+      <Home />
+      <ImageModal />
+    </KeyboardHandler>
+  </>
 );
+
+export default App;

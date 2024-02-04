@@ -21,7 +21,7 @@ const handleKeyDown = (event) => {
   }
 };
 
-export default ({ children }) => (
+const KeyboardHandler = ({ children }) => (
   <div
     onKeyDown={handleKeyDown}
     tabIndex={-1}
@@ -30,3 +30,5 @@ export default ({ children }) => (
     {children}
   </div>
 );
+
+export default KeyboardHandler;

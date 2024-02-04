@@ -1,4 +1,4 @@
-import { signal } from "@preact/signals-core";
+import { signal } from "@preact/signals-react";
 
 const isShowingFacts = signal(false);
 const modalImage = signal(null);

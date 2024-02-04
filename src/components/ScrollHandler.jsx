@@ -1,10 +1,16 @@
+import { useEffect } from 'react';
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { scaleTitlebar } from "@/state";
 
-export default () => {
+const ScrollHandler = () => {
   const [{ y: scrollY }] = useWindowScroll();
 
-  scaleTitlebar.value = scrollY > 100
+  useEffect(() => {
+    scaleTitlebar.value = scrollY > 100;
+  }, [scrollY]);
+
   return null;
 };
+
+export default ScrollHandler;
