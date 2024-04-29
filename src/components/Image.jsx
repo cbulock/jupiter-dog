@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react';
+import styles from './Image.module.css';
+import clsx from "clsx";
+import { useState, useEffect } from "react";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
-import * as stylex from "@stylexjs/stylex";
-import { decode } from 'blurhash';
+import { decode } from "blurhash";
 
-const isDev = import.meta.env.DEV;
-
-const styles = stylex.create({
-  image: {
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  },
-});
+const isDev = process.env.NODE_ENV === "development";
 
 const imagePath = ({ src, width, height }) => {
   if (isDev) return src;
@@ -19,17 +13,29 @@ const imagePath = ({ src, width, height }) => {
     : `/.netlify/images?url=${src}`;
 };
 
-export default ({ alt = "", blurhash, src, width, height, lazyLoad = false, style }) => {
+const Image = ({
+  alt = "",
+  blurhash,
+  src,
+  width,
+  height,
+  lazyLoad = false,
+  style,
+}) => {
+
   const [backgroundImage, setBackgroundImage] = useState(null);
-  const [observerRef, intersectionObserverEntry] = useIntersectionObserver({ threshold: 0, rootMargin: '20%' });
+  const [observerRef, intersectionObserverEntry] = useIntersectionObserver({
+    threshold: 0,
+    rootMargin: "20%",
+  });
 
   useEffect(() => {
     if (!blurhash) return;
     if (!intersectionObserverEntry?.isIntersecting || backgroundImage) return;
     const pixels = decode(blurhash, width, height);
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     canvas.width = width;
     canvas.height = height;
     const imageData = ctx.createImageData(width, height);
@@ -38,8 +44,7 @@ export default ({ alt = "", blurhash, src, width, height, lazyLoad = false, styl
 
     const imageURL = canvas.toDataURL();
     setBackgroundImage(`url(${imageURL})`);
-  }, [blurhash, width, height, intersectionObserverEntry]);
-
+  }, [backgroundImage, blurhash, width, height, intersectionObserverEntry]);
 
   const srcSet =
     width && height
@@ -60,7 +65,9 @@ export default ({ alt = "", blurhash, src, width, height, lazyLoad = false, styl
       height={height}
       style={{ backgroundImage }}
       ref={observerRef}
-      {...stylex.props(styles.image, style)}
+      className={clsx(styles.image, style)}
     />
   );
 };
+
+export default Image;

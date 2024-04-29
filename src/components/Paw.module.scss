@@ -1,0 +1,20 @@
+.wrapper {
+  height: 48px;  // Assuming pixels as the unit
+  width: 48px;   // Assuming pixels as the unit
+  padding: 16px;
+  cursor: url('../../public/paw.svg'), auto;
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:hover svg {
+    filter: brightness(120%);
+  }
+}
+
+.svg {
+  transform: rotate(30deg);
+  color: var(--secondary-color);
+  transition: filter 0.5s;
+}

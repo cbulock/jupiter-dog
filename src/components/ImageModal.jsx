@@ -1,43 +1,10 @@
-import * as stylex from "@stylexjs/stylex";
+import styles from "./ImageModal.module.css";
+import { useSignals } from "@preact/signals-react/runtime";
+import clsx from "clsx";
 import { useWindowSize } from "@uidotdev/usehooks";
 
 import Image from "@/components/Image";
 import { modalImage } from "@/state";
-
-const styles = stylex.create({
-  backdrop: {
-    background: "rgb(0 0 0 / 60%);",
-    display: "none",
-    height: "100lvh",
-    width: "100vw",
-    position: "fixed",
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-  },
-  modal: {
-    position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    height: "fit-content",
-    maxHeight: "calc(100% - 96px)",
-    width: "fit-content",
-    maxWidth: "calc(100% - 96px)",
-    background: "var(--light-color)",
-    padding: 16,
-    boxShadow: "10px 10px 25px 0px rgba(0,0,0,0.75)",
-  },
-  open: {
-    display: "block",
-  },
-  modalContents: {
-    display: "flex",
-    justifyContent: "center",
-    height: "100%",
-    width: "100%",
-  },
-});
 
 const modalClick = (e) => {
   e.stopPropagation();
@@ -73,7 +40,8 @@ const scaleToFitWindow = ({
   return { width: Math.round(newWidth), height: Math.round(newHeight) };
 };
 
-export default () => {
+const ImageModal = () => {
+  useSignals();
   const windowSize = useWindowSize();
   const imageSize = scaleToFitWindow({
     windowWidth: windowSize.width * 0.8,
@@ -85,10 +53,10 @@ export default () => {
   return (
     <div
       onClick={() => (modalImage.value = null)}
-      {...stylex.props(styles.backdrop, modalImage.value && styles.open)}
+      className={clsx(styles.backdrop, modalImage.value && styles.open)}
     >
-      <div onClick={modalClick} {...stylex.props(styles.modal)}>
-        <div {...stylex.props(styles.modalContents)}>
+      <div onClick={modalClick} className={styles.modal}>
+        <div className={styles.modalContents}>
           {modalImage.value && (
             <Image
               src={`/images/${modalImage.value?.fileName}`}
@@ -103,3 +71,5 @@ export default () => {
     </div>
   );
 };
+
+export default ImageModal;
