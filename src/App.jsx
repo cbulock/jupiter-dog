@@ -3,8 +3,6 @@ import ImageModal from "@/components/ImageModal";
 import KeyboardHandler from "@/components/KeyboardHandler";
 import ScrollHandler from "@/components/ScrollHandler";
 
-import "./App.css";
-
 const App = () => (
   <>
     <ScrollHandler />
@@ -14,5 +12,5 @@ const App = () => (
     </KeyboardHandler>
   </>
 );
-
+ 
 export default App;

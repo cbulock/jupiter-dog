@@ -1,14 +1,7 @@
-import * as stylex from "@stylexjs/stylex";
+import styles from './KeyboardHandler.module.scss';
+import { useSignals } from "@preact/signals-react/runtime";
 
 import { isShowingFacts, modalImage } from "@/state";
-
-const styles = stylex.create({
-  keyboard: {
-    ":focus": {
-      outline: "none",
-    },
-  },
-});
 
 const handleKeyDown = (event) => {
   event.preventDefault();
@@ -21,14 +14,16 @@ const handleKeyDown = (event) => {
   }
 };
 
-const KeyboardHandler = ({ children }) => (
+const KeyboardHandler = ({ children }) => { 
+  useSignals();
+  return (
   <div
     onKeyDown={handleKeyDown}
     tabIndex={-1}
-    {...stylex.props(styles.keyboard)}
+    className={styles.keyboard}
   >
     {children}
   </div>
-);
+)};
 
 export default KeyboardHandler;

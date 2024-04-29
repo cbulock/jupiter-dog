@@ -1,0 +1,35 @@
+.backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  height: 100lvh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: fit-content;
+  max-height: calc(100% - 96px);
+  width: fit-content;
+  max-width: calc(100% - 96px);
+  background: var(--light-color);
+  padding: 16px;
+  box-shadow: 10px 10px 25px 0 rgba(0, 0, 0, 0.75);
+}
+
+.open {
+  display: block;
+}
+
+.modalContents {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}

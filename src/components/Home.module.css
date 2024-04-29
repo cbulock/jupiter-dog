@@ -1,0 +1,22 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  top: 8px;
+  left: 0;
+  z-index: 2;
+}
+.main {
+  margin: 8px;
+}
+.imageContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}

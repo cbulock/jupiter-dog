@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
+import { useSignals } from "@preact/signals-react/runtime";
 import { useWindowScroll } from "@uidotdev/usehooks";
 
 import { scaleTitlebar } from "@/state";
 
 const ScrollHandler = () => {
+  useSignals();
   const [{ y: scrollY }] = useWindowScroll();
 
   useEffect(() => {

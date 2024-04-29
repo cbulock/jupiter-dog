@@ -1,0 +1,15 @@
+.title {
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: var(--secondary-color);
+  color: var(--secondary-color);
+  position: fixed;
+  left: 85px;
+  transition: transform 0.2s ease, left 0.2s ease;
+  z-index: 2;
+}
+
+.smaller {
+  transform: scale(0.7);
+  transform-origin: left;
+  left: 24px;
+}
