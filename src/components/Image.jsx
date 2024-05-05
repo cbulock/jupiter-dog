@@ -1,17 +1,9 @@
+import NextImage from 'next/image'
 import styles from './Image.module.css';
 import clsx from "clsx";
 import { useState, useEffect } from "react";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { decode } from "blurhash";
-
-const isDev = process.env.NODE_ENV === "development";
-
-const imagePath = ({ src, width, height }) => {
-  if (isDev) return src;
-  return width && height
-    ? `/.netlify/images?url=${src}&w=${width}&h=${height}`
-    : `/.netlify/images?url=${src}`;
-};
 
 const Image = ({
   alt = "",
@@ -46,21 +38,11 @@ const Image = ({
     setBackgroundImage(`url(${imageURL})`);
   }, [backgroundImage, blurhash, width, height, intersectionObserverEntry]);
 
-  const srcSet =
-    width && height
-      ? `${imagePath({ src, width, height })}, ${imagePath({
-          src,
-          width: width * 2,
-          height: height * 2,
-        })} 2x, ${imagePath({ src, width: width * 3, height: height * 3 })} 3x`
-      : imagePath({ src });
-
   return (
-    <img
+    <NextImage
       loading={lazyLoad ? "lazy" : "eager"}
       alt={alt}
-      src={imagePath({ src, width, height })}
-      srcSet={srcSet}
+      src={src}
       width={width}
       height={height}
       style={{ backgroundImage }}
