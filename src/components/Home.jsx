@@ -9,7 +9,7 @@ import Paw from "@/components/Paw";
 import Title from "@/components/Title";
 
 const Home = async () => {
-  const response = await fetch('/api/image/list');
+  const response = await fetch('/api/image/list?pageSize=500');
   const data = await response.json();
 
   const imageList = data.data;
