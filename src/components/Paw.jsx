@@ -4,9 +4,8 @@ import clsx from "clsx";
 import { scaleTitlebar } from "@/state";
 import PawImage from "@/assets/paw.svg";
 
-const bark = new Audio("bark.mp3");
-
 const handleClick = () => {
+  const bark = new Audio("bark.mp3");
   bark.play();
 };
 

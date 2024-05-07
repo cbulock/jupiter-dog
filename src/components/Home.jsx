@@ -1,10 +1,7 @@
-// import { lazy } from "react";
 import styles from "./Home.module.css";
 
 import ImageCard from "@/components/ImageCard";
 import JupiterHead from "@/components/JupiterHead";
-// TODO bring back lazy load
-// const Paw = lazy(() => import("@/components/Paw"));
 import Paw from "@/components/Paw";
 import Title from "@/components/Title";
 
