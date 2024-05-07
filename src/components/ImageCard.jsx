@@ -37,6 +37,7 @@ const ImageCard = ({ imageData, lazyLoad = true }) => {
         height={newSizes.height}
         lazyLoad={lazyLoad}
         className={styles.image}
+        alt="Photo of Jupiter"
       />
     </div>
   );

@@ -2,7 +2,7 @@ import styles from "./JupiterHead.module.scss";
 import { useSignals } from "@preact/signals-react/runtime";
 import Facts from "@/components/Facts";
 import Image from "@/components/Image";
-import { isShowingFacts, scaleTitlebar } from "@/state";
+import { isShowingFacts } from "@/state";
 
 const JupiterHead = () => {
   useSignals();

@@ -1,15 +1,14 @@
 import styles from "./Home.module.css";
-
+import { useSignals } from "@preact/signals-react/runtime";
 import ImageCard from "@/components/ImageCard";
+import ImageLoader from "@/components/ImageLoader";
 import JupiterHead from "@/components/JupiterHead";
 import Paw from "@/components/Paw";
 import Title from "@/components/Title";
+import { imageList } from "@/state";
 
-const Home = async () => {
-  const response = await fetch('/api/image/list?pageSize=500');
-  const data = await response.json();
-
-  const imageList = data.data;
+const Home = () => {
+  useSignals();
 
   return (
     <main className={styles.main}>
@@ -22,7 +21,7 @@ const Home = async () => {
       </header>
 
       <div className={styles.imageContainer}>
-        {imageList?.map((imageData, index) => (
+        {imageList.value.map((imageData, index) => (
           <ImageCard
             key={imageData.fileName}
             imageData={imageData}
@@ -30,6 +29,7 @@ const Home = async () => {
           />
         ))}
       </div>
+      <ImageLoader />
     </main>
   );
 };

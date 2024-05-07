@@ -2,8 +2,8 @@ import imageList from "@/imageList.json";
 
 export const GET = async (request, response) => {
   const searchParams = request.nextUrl.searchParams;
-  const page = searchParams.get('page') || 1;
-  const pageSize = searchParams.get('pageSize') || 10;
+  const page = parseInt(searchParams.get("page")) || 1;
+  const pageSize = parseInt(searchParams.get("pageSize")) || 10;
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
