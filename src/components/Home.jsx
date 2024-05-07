@@ -3,32 +3,38 @@ import styles from "./Home.module.css";
 
 import ImageCard from "@/components/ImageCard";
 import JupiterHead from "@/components/JupiterHead";
+// TODO bring back lazy load
 // const Paw = lazy(() => import("@/components/Paw"));
 import Paw from "@/components/Paw";
 import Title from "@/components/Title";
 
-import imageList from "../imageList.json";
+const Home = async () => {
+  const response = await fetch('/api/image/list');
+  const data = await response.json();
 
-const Home = () => (
-  <main className={styles.main}>
-    <header className={styles.header}>
-      <div className={styles.titleContainer}>
-        <JupiterHead />
-        <Title />
+  const imageList = data.data;
+
+  return (
+    <main className={styles.main}>
+      <header className={styles.header}>
+        <div className={styles.titleContainer}>
+          <JupiterHead />
+          <Title />
+        </div>
+        <Paw />
+      </header>
+
+      <div className={styles.imageContainer}>
+        {imageList?.map((imageData, index) => (
+          <ImageCard
+            key={imageData.fileName}
+            imageData={imageData}
+            lazyLoad={index > 7}
+          />
+        ))}
       </div>
-      <Paw />
-    </header>
-
-    <div className={styles.imageContainer}>
-      {imageList?.map((imageData, index) => (
-        <ImageCard
-          key={imageData.fileName}
-          imageData={imageData}
-          lazyLoad={index > 7}
-        />
-      ))}
-    </div>
-  </main>
-);
+    </main>
+  );
+};
 
 export default Home;
