@@ -1,5 +1,4 @@
-const axios = require("axios");
-const simpleGit = require("simple-git");
+const { clone, commit, push } = require('@netlify/git-utils');
 const { Dropbox } = require("dropbox");
 const fs = require("fs");
 const path = require("path");
@@ -35,8 +34,7 @@ exports.handler = async (event, context) => {
         throw error;
       }
     }
-    const git = simpleGit();
-    await git.clone("https://github.com/cbulock/jupiter-dog.git", repoPath);
+    await clone("https://github.com/cbulock/jupiter-dog.git", repoPath);
 
     // Download and save the images to the Git repository if they don't already exist
     for (const file of imageFiles) {
@@ -57,10 +55,23 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Commit and push the changes to the Git repository
-    await git.add("./*");
-    await git.commit("Add new images from Dropbox folder");
-    await git.push();
+  // Stage all changes
+  await commit({
+    dir: repoPath,
+    message: 'Add new images from Dropbox folder',
+    author: {
+      name: 'Automated Script by Cameron Bulock',
+      email: 'cameron@bulock.com',
+    },
+    files: ['.'],
+  });
+
+  // Push the changes to the remote repository
+  await push({
+    dir: repoPath,
+    remote: 'origin',
+    ref: 'main',
+  });
 
     return {
       statusCode: 200,
