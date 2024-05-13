@@ -23,7 +23,8 @@ exports.handler = async (event, context) => {
     );
 
     // Clone the Git repository
-    const repoPath = "./repo";
+    const repoPath = path.join(os.tmpdir(), 'repo');
+    const token = process.env.GITHUB_TOKEN;
     // clean up any leftovers
     try {
       fs.rmSync(repoPath, { recursive: true });
@@ -41,6 +42,10 @@ exports.handler = async (event, context) => {
       dir: repoPath,
       url: "https://github.com/cbulock/jupiter-dog.git",
       depth: 1,
+      onAuth: () => ({
+        username: token,
+        password: 'x-oauth-basic',
+      }),
     });
 
     // Download and save the images to the Git repository if they don't already exist
@@ -87,6 +92,10 @@ exports.handler = async (event, context) => {
       dir: repoPath,
       remote: "origin",
       ref: "main",
+      onAuth: () => ({
+        username: token,
+        password: 'x-oauth-basic',
+      }),
     });
 
     return {
