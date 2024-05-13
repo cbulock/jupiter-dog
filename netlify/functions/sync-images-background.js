@@ -1,6 +1,8 @@
 const { Dropbox } = require("dropbox");
 const fs = require("fs");
 const path = require("path");
+const git = require("isomorphic-git");
+const http = require("isomorphic-git/http/node");
 
 exports.handler = async (event, context) => {
   try {
@@ -21,7 +23,6 @@ exports.handler = async (event, context) => {
     );
 
     // Clone the Git repository
-    const { clone, commit, push } = await import('@netlify/git-utils');
     const repoPath = "./repo";
     // clean up any leftovers
     try {
@@ -34,7 +35,13 @@ exports.handler = async (event, context) => {
         throw error;
       }
     }
-    await clone("https://github.com/cbulock/jupiter-dog.git", repoPath);
+    await git.clone({
+      fs,
+      http,
+      dir: repoPath,
+      url: "https://github.com/cbulock/jupiter-dog.git",
+      depth: 1,
+    });
 
     // Download and save the images to the Git repository if they don't already exist
     for (const file of imageFiles) {
@@ -55,23 +62,32 @@ exports.handler = async (event, context) => {
       }
     }
 
-  // Stage all changes
-  await commit({
-    dir: repoPath,
-    message: 'Add new images from Dropbox folder',
-    author: {
-      name: 'Automated Script by Cameron Bulock',
-      email: 'cameron@bulock.com',
-    },
-    files: ['.'],
-  });
+    // Stage all changes
+    await git.add({
+      fs,
+      dir: repoPath,
+      filepath: ".",
+    });
 
-  // Push the changes to the remote repository
-  await push({
-    dir: repoPath,
-    remote: 'origin',
-    ref: 'main',
-  });
+    // Commit the changes
+    await git.commit({
+      fs,
+      dir: repoPath,
+      message: "Add new images from Dropbox folder",
+      author: {
+        name: "Automated Script by Cameron Bulock",
+        email: "cameron@bulock.com",
+      },
+    });
+
+    // Push the changes to the remote repository
+    await git.push({
+      fs,
+      http,
+      dir: repoPath,
+      remote: "origin",
+      ref: "main",
+    });
 
     return {
       statusCode: 200,
