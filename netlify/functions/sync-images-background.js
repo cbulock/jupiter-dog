@@ -1,4 +1,3 @@
-const { clone, commit, push } = require('@netlify/git-utils');
 const { Dropbox } = require("dropbox");
 const fs = require("fs");
 const path = require("path");
@@ -22,6 +21,7 @@ exports.handler = async (event, context) => {
     );
 
     // Clone the Git repository
+    const { clone, commit, push } = await import('@netlify/git-utils');
     const repoPath = "./repo";
     // clean up any leftovers
     try {
