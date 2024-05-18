@@ -1,9 +1,8 @@
 const { Dropbox } = require("dropbox");
+const { getStore } = require("@netlify/blobs");
 const fs = require("fs");
 const path = require("path");
-const os = require('os');
-const git = require("isomorphic-git");
-const http = require("isomorphic-git/http/node");
+const os = require("os");
 
 exports.handler = async (event, context) => {
   try {
@@ -23,81 +22,28 @@ exports.handler = async (event, context) => {
       file.name.match(/\.(jpg|jpeg|png|gif)$/i)
     );
 
-    // Clone the Git repository
-    const repoPath = path.join(os.tmpdir(), 'repo');
-    const token = process.env.GITHUB_TOKEN;
-    // clean up any leftovers
-    try {
-      fs.rmSync(repoPath, { recursive: true });
-      console.log("Cleaned up the cloned repository directory");
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        console.log("Directory does not exist, skipping cleanup");
-      } else {
-        throw error;
-      }
-    }
-    await git.clone({
-      fs,
-      http,
-      dir: repoPath,
-      url: "https://github.com/cbulock/jupiter-dog.git",
-      depth: 1,
-      onAuth: () => ({
-        username: token,
-        password: 'x-oauth-basic',
-      }),
-    });
+    // Get the Netlify Blobs store
+    const store = getStore("jupiter-images");
 
-    // Download and save the images to the Git repository if they don't already exist
+    // Download and save the images to Netlify Blobs
     for (const file of imageFiles) {
       const imagePath = file.path_display;
       const imageName = file.name;
-      const repoImagePath = path.join(repoPath, "/public/images/", imageName);
 
-      // Check if the image file already exists in the Git repository
-      if (!fs.existsSync(repoImagePath)) {
+      // Check if the image file already exists in the Netlify Blobs store
+      const existingImage = await store.get(imageName);
+      if (!existingImage) {
         // Download the image from Dropbox
         const response = await dropbox.filesDownload({ path: imagePath });
         const imageData = response.result.fileBinary;
-        // Save the image to the Git repository
-        fs.writeFileSync(repoImagePath, imageData);
+
+        // Save the image to Netlify Blobs
+        await store.set(imageName, imageData, { metadata: { contentType: response.result.fileMetadata.mimeType } });
         console.log(`Added new image: ${imageName}`);
       } else {
         console.log(`Image already exists: ${imageName}`);
       }
     }
-
-    // Stage all changes
-    await git.add({
-      fs,
-      dir: repoPath,
-      filepath: ".",
-    });
-
-    // Commit the changes
-    await git.commit({
-      fs,
-      dir: repoPath,
-      message: "Add new images from Dropbox folder",
-      author: {
-        name: "Automated Script by Cameron Bulock",
-        email: "cameron@bulock.com",
-      },
-    });
-
-    // Push the changes to the remote repository
-    await git.push({
-      fs,
-      http,
-      dir: repoPath,
-      remote: "origin",
-      ref: "main",
-      onAuth: () => ({
-        username: token,
-        password: 'x-oauth-basic',
-      }),
-    });
 
     return {
       statusCode: 200,
