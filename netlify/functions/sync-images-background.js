@@ -1,6 +1,7 @@
 const { Dropbox } = require("dropbox");
 const { getStore } = require("@netlify/blobs");
 const fetch = require("node-fetch");
+const mime = require("mime-types");
 
 exports.handler = async (event, context) => {
   try {
@@ -64,8 +65,11 @@ exports.handler = async (event, context) => {
         const response = await dropbox.filesDownload({ path: imagePath });
         const imageData = Buffer.from(response.result.fileBinary, 'binary');
 
+        // Determine the MIME type
+        const mimeType = mime.lookup(imageName) || 'application/octet-stream';
+
         // Save the image to Netlify Blobs
-        await store.set(imageName, imageData, { metadata: { contentType: response.result.fileMetadata.mimeType } });
+        await store.set(imageName, imageData, { metadata: { contentType: mimeType } });
         console.log(`Added new image: ${imageName}`);
       } else {
         console.log(`Image already exists: ${imageName}`);
