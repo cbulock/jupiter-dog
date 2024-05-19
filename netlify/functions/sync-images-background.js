@@ -8,6 +8,8 @@ exports.handler = async (event, context) => {
     const clientId = process.env.DROPBOX_CLIENT_ID;
     const clientSecret = process.env.DROPBOX_CLIENT_SECRET;
     const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+    const siteID = process.env.NETLIFY_SITE_ID;
+    const token = process.env.NETLIFY_ACCESS_TOKEN;
 
     // Function to refresh the Dropbox access token
     async function refreshAccessToken() {
@@ -48,7 +50,7 @@ exports.handler = async (event, context) => {
     );
 
     // Get the Netlify Blobs store
-    const store = getStore("jupiter-images");
+    const store = getStore({ name: "jupiter-images", siteID, token });
 
     // Download and save the images to Netlify Blobs
     for (const file of imageFiles) {
