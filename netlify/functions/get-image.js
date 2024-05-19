@@ -17,8 +17,12 @@ export const handler = async (event) => {
     };
   }
 
-  // Convert binary data to base64 string
-  const base64Data = Buffer.from(data).toString("base64");
+  // Convert Blob to Buffer
+  const arrayBuffer = await data.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  // Convert Buffer to base64
+  const base64Data = buffer.toString("base64");
 
   return {
     statusCode: 200,
