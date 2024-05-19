@@ -2,6 +2,71 @@ const { Dropbox } = require("dropbox");
 const { getStore } = require("@netlify/blobs");
 const fetch = require("node-fetch");
 const mime = require("mime-types");
+const fs = require("fs");
+const path = require("path");
+const exifParser = require("exif-parser");
+const dayjs = require("dayjs");
+const probe = require("probe-image-size");
+const sharp = require("sharp");
+const { encode } = require("blurhash");
+const os = require("os");
+
+async function getEXIFData(filePath) {
+  try {
+    const buffer = await fs.promises.readFile(filePath);
+    const parser = exifParser.create(buffer);
+    const result = parser.parse();
+    return result.tags;
+  } catch (error) {
+    console.error("Error reading EXIF data:", error);
+    return null;
+  }
+}
+
+async function getImageDimensions(filePath, orientation) {
+  try {
+    const stream = fs.createReadStream(filePath);
+    const dimensions = await probe(stream);
+    stream.close();
+
+    // Check if orientation requires width and height to be swapped
+    if (orientation >= 5 && orientation <= 8) {
+      return { width: dimensions.height, height: dimensions.width };
+    }
+
+    return { width: dimensions.width, height: dimensions.height };
+  } catch (error) {
+    console.error(
+      `Error getting image dimensions for ${filePath}:`,
+      error.message
+    );
+    return { width: null, height: null };
+  }
+}
+
+async function getBlurhash(filePath, dimensions) {
+  try {
+    const processingReduction = 8;
+    const newDimensions = {
+      width: Math.round(dimensions.width / processingReduction),
+      height: Math.round(dimensions.height / processingReduction),
+    };
+    const buffer = await sharp(filePath)
+      .raw()
+      .ensureAlpha()
+      .resize(newDimensions.width, newDimensions.height)
+      .toBuffer();
+    return encode(
+      new Uint8ClampedArray(buffer),
+      newDimensions.width,
+      newDimensions.height,
+      4,
+      4
+    );
+  } catch (error) {
+    console.error(`Error getting blurhash for ${filePath}:`, error.message);
+  }
+}
 
 exports.handler = async (event, context) => {
   try {
@@ -14,22 +79,24 @@ exports.handler = async (event, context) => {
 
     // Function to refresh the Dropbox access token
     async function refreshAccessToken() {
-      const response = await fetch('https://api.dropboxapi.com/oauth2/token', {
-        method: 'POST',
+      const response = await fetch("https://api.dropboxapi.com/oauth2/token", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          grant_type: 'refresh_token',
+          grant_type: "refresh_token",
           refresh_token: refreshToken,
           client_id: clientId,
           client_secret: clientSecret,
-        })
+        }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(`Error refreshing access token: ${data.error_description}`);
+        throw new Error(
+          `Error refreshing access token: ${data.error_description}`
+        );
       }
       return data.access_token;
     }
@@ -50,27 +117,69 @@ exports.handler = async (event, context) => {
       file.name.match(/\.(jpg|jpeg|png|gif)$/i)
     );
 
-    // Get the Netlify Blobs store
-    const store = getStore({ name: "jupiter-images", siteID, token });
+    // Get the Netlify Blobs store for images and metadata
+    const imageStore = getStore({ name: "jupiter-images", siteID, token });
+    const metadataStore = getStore({
+      name: "jupiter-images-metadata",
+      siteID,
+      token,
+    });
 
-    // Download and save the images to Netlify Blobs
+    // Download, process, and save the images and metadata to Netlify Blobs
     for (const file of imageFiles) {
       const imagePath = file.path_display;
       const imageName = file.name;
 
       // Check if the image file already exists in the Netlify Blobs store
-      const existingImage = await store.get(imageName);
+      const existingImage = await imageStore.get(imageName);
       if (!existingImage) {
         // Download the image from Dropbox
         const response = await dropbox.filesDownload({ path: imagePath });
-        const imageData = Buffer.from(response.result.fileBinary, 'binary');
-
-        // Determine the MIME type
-        const mimeType = mime.lookup(imageName) || 'application/octet-stream';
+        const imageData = Buffer.from(response.result.fileBinary, "binary");
 
         // Save the image to Netlify Blobs
-        await store.set(imageName, imageData, { metadata: { contentType: mimeType } });
+        await imageStore.set(imageName, imageData, {
+          metadata: {
+            contentType: mime.lookup(imageName) || "application/octet-stream",
+          },
+        });
         console.log(`Added new image: ${imageName}`);
+
+        // Process metadata
+        const tempFilePath = path.join(os.tmpdir(), imageName);
+        await fs.promises.writeFile(tempFilePath, imageData);
+
+        const exifData = await getEXIFData(tempFilePath);
+        if (exifData?.DateTimeOriginal) {
+          const createdDate = dayjs
+            .unix(exifData.DateTimeOriginal)
+            .toISOString();
+          const orientation = exifData.Orientation || 1; // Default orientation is 1
+          const dimensions = await getImageDimensions(
+            tempFilePath,
+            orientation
+          );
+          const blurhash = await getBlurhash(tempFilePath, dimensions);
+
+          const metadata = {
+            blurhash,
+            fileName: imageName,
+            exifData,
+            createdDate,
+            ...dimensions,
+          };
+          const metadataKey = `${imageName}.json`;
+
+          // Save metadata to Netlify Blobs
+          await metadataStore.set(
+            metadataKey,
+            JSON.stringify(metadata, null, 2)
+          );
+          console.log(`Added metadata for image: ${imageName}`);
+        }
+
+        // Clean up temporary file
+        await fs.promises.unlink(tempFilePath);
       } else {
         console.log(`Image already exists: ${imageName}`);
       }
@@ -78,13 +187,13 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
-      body: "Images synced successfully",
+      body: "Images and metadata synced successfully",
     };
   } catch (error) {
-    console.error("Error syncing images:", error);
+    console.error("Error syncing images and metadata:", error);
     return {
       statusCode: 500,
-      body: "Error syncing images",
+      body: "Error syncing images and metadata",
     };
   }
 };
