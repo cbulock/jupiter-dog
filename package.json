@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:netlify": "netlify dev",
-    "build": "node ./scripts/generateImageList.mjs && next build",
+    "build": "node ./scripts/generateImageList.js && next build",
     "start": "next start",
     "lint": "next lint"
   },
