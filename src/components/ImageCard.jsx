@@ -31,7 +31,7 @@ const ImageCard = ({ imageData, lazyLoad = true }) => {
       className={styles.imageWrapper}
     >
       <Image
-        src={`/images/${fileName}`}
+        src={`/.netlify/functions/get-image?name=${fileName}`}
         blurhash={blurhash}
         width={newSizes.width}
         height={newSizes.height}

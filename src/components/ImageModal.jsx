@@ -59,7 +59,7 @@ const ImageModal = () => {
         <div className={styles.modalContents}>
           {modalImage.value && (
             <Image
-              src={`/images/${modalImage.value?.fileName}`}
+              src={`/.netlify/functions/get-image?name=${modalImage.value?.fileName}`}
               alt="Image of Jupiter"
               blurhash={modalImage.value?.blurhash}
               height={imageSize.height}
