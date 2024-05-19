@@ -16,7 +16,7 @@ async function generateImageList() {
 
     for (const metadata of metadataList.blobs) {
       const metadataKey = metadata.key;
-      const { data: metadataContent } = await metadataStore.get(metadataKey, { type: 'json' });
+      const metadataContent = await metadataStore.get(metadataKey, { type: 'json' });
 
       if (metadataContent) {
         const { exifData, ...metadataWithoutExif } = metadataContent;
