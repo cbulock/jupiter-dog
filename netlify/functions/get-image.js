@@ -17,10 +17,13 @@ export const handler = async (event) => {
     };
   }
 
+  // Convert binary data to base64 string
+  const base64Data = Buffer.from(data).toString("base64");
+
   return {
     statusCode: 200,
     headers: { "Content-Type": metadata.contentType },
-    body: data,
+    body: base64Data,
     isBase64Encoded: true,
   };
 };
