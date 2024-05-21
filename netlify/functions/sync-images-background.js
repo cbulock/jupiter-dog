@@ -149,7 +149,7 @@ exports.handler = async (event, context) => {
         // Resize the image if it exceeds the maximum size
         let resizedImageData = imageData;
         if (imageData.length > maxImageSize) {
-          const image = sharp(imageData).withMetadata(); // Preserve metadata
+          const image = await sharp(imageData).keepExif().withMetadata(); // Preserve metadata
 
           // Rotate the image based on the orientation
           switch (orientation) {
