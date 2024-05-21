@@ -139,10 +139,33 @@ exports.handler = async (event, context) => {
         const response = await dropbox.filesDownload({ path: imagePath });
         const imageData = Buffer.from(response.result.fileBinary, "binary");
 
+        // Process metadata
+        const tempFilePath = path.join(os.tmpdir(), imageName);
+        await fs.promises.writeFile(tempFilePath, imageData);
+
+        const exifData = await getEXIFData(tempFilePath);
+        const orientation = exifData?.Orientation || 1; // Default orientation is 1
+
         // Resize the image if it exceeds the maximum size
         let resizedImageData = imageData;
         if (imageData.length > maxImageSize) {
-          const image = sharp(imageData);
+          const image = sharp(imageData).withMetadata(); // Preserve metadata
+
+          // Rotate the image based on the orientation
+          switch (orientation) {
+            case 3:
+              image.rotate(180);
+              break;
+            case 6:
+              image.rotate(90);
+              break;
+            case 8:
+              image.rotate(270);
+              break;
+            default:
+              break;
+          }
+
           const metadata = await image.metadata();
           const aspectRatio = metadata.width / metadata.height;
 
@@ -161,7 +184,7 @@ exports.handler = async (event, context) => {
             .toBuffer();
         }
 
-        // Save the image to Netlify Blobs
+        // Save the resized image to Netlify Blobs
         await imageStore.set(imageName, resizedImageData, {
           metadata: {
             contentType: mime.lookup(imageName) || "application/octet-stream",
@@ -169,11 +192,6 @@ exports.handler = async (event, context) => {
         });
         console.log(`Added new image: ${imageName}`);
 
-        // Process metadata
-        const tempFilePath = path.join(os.tmpdir(), imageName);
-        await fs.promises.writeFile(tempFilePath, resizedImageData);
-
-        const exifData = await getEXIFData(tempFilePath);
         if (exifData?.DateTimeOriginal) {
           const createdDate = dayjs
             .unix(exifData.DateTimeOriginal)
