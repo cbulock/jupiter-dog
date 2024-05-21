@@ -11,6 +11,8 @@ const sharp = require("sharp");
 const { encode } = require("blurhash");
 const os = require("os");
 
+const maxImageSize = 4 * 1024 * 1024; // 4MB in bytes
+
 async function getEXIFData(filePath) {
   try {
     const buffer = await fs.promises.readFile(filePath);
@@ -137,8 +139,30 @@ exports.handler = async (event, context) => {
         const response = await dropbox.filesDownload({ path: imagePath });
         const imageData = Buffer.from(response.result.fileBinary, "binary");
 
+        // Resize the image if it exceeds the maximum size
+        let resizedImageData = imageData;
+        if (imageData.length > maxImageSize) {
+          const image = sharp(imageData);
+          const metadata = await image.metadata();
+          const aspectRatio = metadata.width / metadata.height;
+
+          // Calculate the new dimensions while maintaining the aspect ratio
+          let newWidth, newHeight;
+          if (aspectRatio > 1) {
+            newWidth = Math.sqrt(maxImageSize / aspectRatio);
+            newHeight = newWidth / aspectRatio;
+          } else {
+            newHeight = Math.sqrt(maxImageSize * aspectRatio);
+            newWidth = newHeight * aspectRatio;
+          }
+
+          resizedImageData = await image
+            .resize(Math.round(newWidth), Math.round(newHeight))
+            .toBuffer();
+        }
+
         // Save the image to Netlify Blobs
-        await imageStore.set(imageName, imageData, {
+        await imageStore.set(imageName, resizedImageData, {
           metadata: {
             contentType: mime.lookup(imageName) || "application/octet-stream",
           },
@@ -147,7 +171,7 @@ exports.handler = async (event, context) => {
 
         // Process metadata
         const tempFilePath = path.join(os.tmpdir(), imageName);
-        await fs.promises.writeFile(tempFilePath, imageData);
+        await fs.promises.writeFile(tempFilePath, resizedImageData);
 
         const exifData = await getEXIFData(tempFilePath);
         if (exifData?.DateTimeOriginal) {
