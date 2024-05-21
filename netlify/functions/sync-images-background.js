@@ -204,6 +204,24 @@ exports.handler = async (event, context) => {
 
         // Clean up temporary file
         await fs.promises.unlink(tempFilePath);
+
+        // Trigger a new build on the Netlify app
+        const netlifyApiUrl = `https://api.netlify.com/api/v1/sites/${siteID}/builds`;
+
+        const buildResponse = await fetch(netlifyApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({}),
+        });
+
+        if (buildResponse.ok) {
+          console.log("Build triggered successfully");
+        } else {
+          console.error("Error triggering build:", buildResponse.statusText);
+        }
       } else {
         console.log(`Image already exists: ${imageName}`);
       }
