@@ -149,7 +149,7 @@ exports.handler = async (event, context) => {
         // Resize the image if it exceeds the maximum size
         let resizedImageData = imageData;
         if (imageData.length > maxImageSize) {
-          const image = await sharp(imageData).keepExif().withMetadata(); // Preserve metadata
+          const image = sharp(imageData).withMetadata(); // Preserve metadata
 
           // Rotate the image based on the orientation
           switch (orientation) {
@@ -160,14 +160,22 @@ exports.handler = async (event, context) => {
               image.rotate(90);
               break;
             case 8:
-              image.rotate(270);
+              image.rotate(-90);
               break;
             default:
               break;
           }
 
           const metadata = await image.metadata();
-          const aspectRatio = metadata.width / metadata.height;
+          const width =
+            orientation >= 5 && orientation <= 8
+              ? metadata.height
+              : metadata.width;
+          const height =
+            orientation >= 5 && orientation <= 8
+              ? metadata.width
+              : metadata.height;
+          const aspectRatio = width / height;
 
           // Calculate the new dimensions while maintaining the aspect ratio
           let newWidth, newHeight;
@@ -196,7 +204,6 @@ exports.handler = async (event, context) => {
           const createdDate = dayjs
             .unix(exifData.DateTimeOriginal)
             .toISOString();
-          const orientation = exifData.Orientation || 1; // Default orientation is 1
           const dimensions = await getImageDimensions(
             tempFilePath,
             orientation
@@ -226,6 +233,7 @@ exports.handler = async (event, context) => {
         console.log(`Image already exists: ${imageName}`);
       }
     }
+
     // Trigger a new build on the Netlify app
     const netlifyApiUrl = `https://api.netlify.com/api/v1/sites/${siteID}/builds`;
 
