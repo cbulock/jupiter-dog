@@ -146,8 +146,8 @@ exports.handler = async (event, context) => {
         const exifData = await getEXIFData(tempFilePath);
         const orientation = exifData?.Orientation || 1; // Default orientation is 1
 
+        console.log('orientation', orientation, exifData?.Orientation)
         // Resize the image if it exceeds the maximum size
-        let resizedImageData = imageData;
         if (imageData.length > maxImageSize) {
           const image = sharp(imageData).withMetadata(); // Preserve metadata
 
@@ -165,6 +165,8 @@ exports.handler = async (event, context) => {
             default:
               break;
           }
+
+          let resizedImageData = imageData;
 
           const metadata = await image.metadata();
           const width = metadata.width;
