@@ -141,15 +141,18 @@ exports.handler = async (event, context) => {
 
         // Process metadata
         const tempFilePath = path.join(os.tmpdir(), imageName);
-        await fs.promises.writeFile(tempFilePath, imageData);
+        const fileStream = fs.createWriteStream(tempFilePath);
+        fileStream.write(imageData);
+        fileStream.end();
+        await new Promise((resolve) => fileStream.on("finish", resolve));
 
         const exifData = await getEXIFData(tempFilePath);
         const orientation = exifData?.Orientation || 1; // Default orientation is 1
 
-        console.log('orientation', orientation, exifData?.Orientation)
         // Resize the image if it exceeds the maximum size
+        let resizedImageData = imageData;
         if (imageData.length > maxImageSize) {
-          const image = sharp(imageData).withMetadata(); // Preserve metadata
+          const image = sharp(imageData);
 
           // Rotate the image based on the orientation
           switch (orientation) {
@@ -166,25 +169,27 @@ exports.handler = async (event, context) => {
               break;
           }
 
-          let resizedImageData = imageData;
-
           const metadata = await image.metadata();
           const width = metadata.width;
           const height = metadata.height;
-          const aspectRatio = width / height;
 
           // Calculate the new dimensions while maintaining the aspect ratio
           let newWidth, newHeight;
-          if (aspectRatio > 1) {
-            newWidth = Math.sqrt(maxImageSize / aspectRatio);
-            newHeight = newWidth / aspectRatio;
+          if (width > height) {
+            newWidth = Math.sqrt(maxImageSize * (width / height));
+            newHeight = newWidth * (height / width);
           } else {
-            newHeight = Math.sqrt(maxImageSize * aspectRatio);
-            newWidth = newHeight * aspectRatio;
+            newHeight = Math.sqrt(maxImageSize * (height / width));
+            newWidth = newHeight * (width / height);
           }
 
           resizedImageData = await image
-            .resize(Math.round(newWidth), Math.round(newHeight))
+            .resize({
+              width: Math.round(newWidth),
+              height: Math.round(newHeight),
+              fit: "inside",
+              withoutEnlargement: true,
+            })
             .toBuffer();
         }
 
@@ -224,12 +229,21 @@ exports.handler = async (event, context) => {
         }
 
         // Clean up temporary file
-        await fs.promises.unlink(tempFilePath);
+        fs.unlink(tempFilePath, (err) => {
+          if (err) {
+            console.error(
+              `Error deleting temporary file: ${tempFilePath}`,
+              err
+            );
+          } else {
+            console.log(`Temporary file deleted: ${tempFilePath}`);
+          }
+        });
       } else {
         console.log(`Image already exists: ${imageName}`);
       }
     }
-
+    
     // Trigger a new build on the Netlify app
     const netlifyApiUrl = `https://api.netlify.com/api/v1/sites/${siteID}/builds`;
 
