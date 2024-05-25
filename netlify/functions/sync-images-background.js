@@ -167,14 +167,8 @@ exports.handler = async (event, context) => {
           }
 
           const metadata = await image.metadata();
-          const width =
-            orientation >= 5 && orientation <= 8
-              ? metadata.height
-              : metadata.width;
-          const height =
-            orientation >= 5 && orientation <= 8
-              ? metadata.width
-              : metadata.height;
+          const width = metadata.width;
+          const height = metadata.height;
           const aspectRatio = width / height;
 
           // Calculate the new dimensions while maintaining the aspect ratio
