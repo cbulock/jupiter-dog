@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 export const metadata = {
   title: "Life of Jupiter",
   description: "Image gallery for the greatest pup in the world, Jupiter",
@@ -11,10 +9,6 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <div id="root">{children}</div>
-        <Script
-          src="https://identity.netlify.com/v1/netlify-identity-widget.js"
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   );
