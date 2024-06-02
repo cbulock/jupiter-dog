@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import styles from "./Title.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
@@ -18,7 +18,9 @@ const Title = () => {
         twinkleStar.className
       )}
     >
-      Life of Jupiter
+      <a href="/" className={styles.titleLink}>
+        Life of Jupiter
+      </a>
     </h1>
   );
 };
