@@ -1,0 +1,35 @@
+.facts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  text-align: center;
+  padding: 20px 0;
+  color: var(--light-color);
+}
+
+.header img {
+  width: 150px;
+  border-radius: 50%;
+}
+
+.info {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  color: var(--light-color);
+}
+
+.info div {
+  text-align: center;
+  padding: 10px;
+}
+
+.breedChart {
+  text-align: center;
+  color: var(--light-color);
+  max-width: 50%;
+}

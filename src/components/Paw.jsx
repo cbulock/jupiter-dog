@@ -1,3 +1,5 @@
+'use client';
+
 import styles from "./Paw.module.scss";
 import { useSignals } from "@preact/signals-react/runtime";
 import clsx from "clsx";

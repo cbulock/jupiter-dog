@@ -1,11 +1,14 @@
-import "../../App.css";
-
-import { ClientOnly } from "./client";
+import Layout from "@/components/layout";
+import Home from "@/components/Home";
 
 export function generateStaticParams() {
   return [{ slug: [""] }];
 }
 
 export default function Page() {
-  return <ClientOnly />;
+  return (
+    <Layout>
+      <Home />
+    </Layout>
+  );
 }

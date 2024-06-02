@@ -1,3 +1,5 @@
+'use client';
+
 import styles from "./Title.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
 import { twinkleStar } from "@/fonts";

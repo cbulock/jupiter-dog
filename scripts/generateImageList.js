@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { getStore } = require("@netlify/blobs");
 const fs = require('fs').promises;
 const path = require('path');

@@ -1,3 +1,5 @@
+'use client';
+
 import styles from './KeyboardHandler.module.scss';
 import { useSignals } from "@preact/signals-react/runtime";
 

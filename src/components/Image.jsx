@@ -1,3 +1,5 @@
+'use client';
+
 import NextImage from 'next/image'
 import styles from './Image.module.css';
 import clsx from "clsx";

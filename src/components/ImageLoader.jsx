@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from "react";
 import { useSignals } from "@preact/signals-react/runtime";
 import { useIntersectionObserver } from "@uidotdev/usehooks";

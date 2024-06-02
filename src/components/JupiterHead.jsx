@@ -1,15 +1,10 @@
 import styles from "./JupiterHead.module.scss";
-import { useSignals } from "@preact/signals-react/runtime";
-import Facts from "@/components/Facts";
 import Image from "@/components/Image";
-import { isShowingFacts } from "@/state";
 
 const JupiterHead = () => {
-  useSignals();
   return (
-    <>
+    <a href='/facts'>
       <div
-        onClick={() => (isShowingFacts.value = !isShowingFacts.value)}
         className={styles.imagewrapper}
       >
         <Image
@@ -20,8 +15,7 @@ const JupiterHead = () => {
           style={styles.image}
         />
       </div>
-      <Facts isOpen={isShowingFacts.value} />
-    </>
+    </a>
   );
 };
 
