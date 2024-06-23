@@ -1,6 +1,7 @@
-import { getStore } from "@netlify/blobs";
+const { getStore } = require('@netlify/blobs');
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
+  console.log('handler is loading')
   const siteID = process.env.NETLIFY_SITE_ID;
   const token = process.env.NETLIFY_ACCESS_TOKEN;
   const store = getStore({ name: "jupiter-images", siteID, token });
@@ -17,17 +18,17 @@ export const handler = async (event) => {
     };
   }
 
-  // Convert Blob to Buffer
   const arrayBuffer = await data.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // Convert Buffer to base64
-  const base64Data = buffer.toString("base64");
-
   return {
     statusCode: 200,
-    headers: { "Content-Type": metadata.contentType },
-    body: base64Data,
+    headers: {
+      "Content-Type": metadata.contentType,
+      "Content-Length": buffer.length,
+      "Cache-Control": "public, max-age=31536000", // Cache for 1 year
+    },
+    body: buffer.toString("base64"), // Return as base64
     isBase64Encoded: true,
   };
 };
