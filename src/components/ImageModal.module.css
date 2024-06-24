@@ -28,8 +28,20 @@
 }
 
 .modalContents {
-  display: flex;
-  justify-content: center;
-  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
   width: 100%;
+}
+
+.imageContainer {
+  grid-row: 1 / 2;
+  width: 100%;
+}
+
+.dateContainer {
+  grid-row: 2 / 3;
+  justify-self: end;
+  padding-right: 20px;
+  min-height: 55px;
 }

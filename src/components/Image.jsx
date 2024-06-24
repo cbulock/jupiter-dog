@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { decode } from "blurhash";
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const Image = ({
   alt = "",
   blurhash,
@@ -50,6 +52,7 @@ const Image = ({
       style={{ backgroundImage }}
       ref={observerRef}
       className={clsx(styles.image, style)}
+      unoptimized={isDev}
     />
   );
 };
