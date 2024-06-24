@@ -1,7 +1,6 @@
 const { getStore } = require('@netlify/blobs');
 
 exports.handler = async (event) => {
-  console.log('handler is loading')
   const siteID = process.env.NETLIFY_SITE_ID;
   const token = process.env.NETLIFY_ACCESS_TOKEN;
   const store = getStore({ name: "jupiter-images", siteID, token });

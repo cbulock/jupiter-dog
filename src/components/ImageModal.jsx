@@ -2,6 +2,8 @@ import styles from "./ImageModal.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
 import clsx from "clsx";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { useState, useEffect } from "react";
+import { merriweatherSans } from "@/fonts";
 
 import Image from "@/components/Image";
 import { modalImage } from "@/state";
@@ -42,6 +44,8 @@ const scaleToFitWindow = ({
 
 const ImageModal = () => {
   useSignals();
+  const [imageDetails, setImageDetails] = useState({});
+
   const windowSize = useWindowSize();
   const imageSize = scaleToFitWindow({
     windowWidth: windowSize.width * 0.8,
@@ -50,21 +54,50 @@ const ImageModal = () => {
     imageHeight: modalImage.value?.height,
   });
 
+  const fileName = modalImage.value?.fileName;
+  useEffect(() => {
+    setImageDetails({});
+    const loadImageDetails = async () => {
+      const response = await fetch(`/api/image/details?image=${fileName}`);
+      setImageDetails(await response.json());
+    };
+
+    loadImageDetails();
+  }, [fileName]);
+
+  const dateString = imageDetails?.data?.createdDate;
+  let formattedDate;
+  if (dateString) {
+    const date = new Date(dateString);
+    formattedDate = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+    });
+  }
+
   return (
     <div
       onClick={() => (modalImage.value = null)}
       className={clsx(styles.backdrop, modalImage.value && styles.open)}
     >
       <div onClick={modalClick} className={styles.modal}>
-        <div className={styles.modalContents}>
+        <div className={clsx(styles.modalContents, merriweatherSans.className)}>
           {modalImage.value && (
-            <Image
-              src={`/.netlify/functions/get-image?name=${modalImage.value?.fileName}`}
-              alt="Image of Jupiter"
-              blurhash={modalImage.value?.blurhash}
-              height={imageSize.height}
-              width={imageSize.width}
-            />
+            <>
+              <div className={styles.imageContainer}>
+                <Image
+                  src={`/.netlify/functions/get-image?name=${modalImage.value?.fileName}`}
+                  alt="Image of Jupiter"
+                  blurhash={modalImage.value?.blurhash}
+                  height={imageSize.height}
+                  width={imageSize.width}
+                />
+              </div>
+              <div className={styles.dateContainer}>
+                <p>{formattedDate}</p>
+              </div>
+            </>
           )}
         </div>
       </div>
