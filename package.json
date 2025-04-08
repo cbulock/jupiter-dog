@@ -28,7 +28,7 @@
     "@svgr/webpack": "^8.1.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "axios": "^1.7.4",
     "dotenv": "^16.4.5",
     "dropbox": "^10.34.0",
@@ -40,6 +40,6 @@
     "mime-types": "^2.1.35",
     "probe-image-size": "^7.2.3",
     "sharp": "^0.33.2",
-    "vite": "^5.4.6"
+    "vite": "^6.2.5"
   }
 }
