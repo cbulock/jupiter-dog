@@ -16,7 +16,7 @@ const Image = ({
   width,
   height,
   lazyLoad = false,
-  style,
+  className,
 }) => {
 
   const [backgroundImage, setBackgroundImage] = useState(null);
@@ -51,7 +51,7 @@ const Image = ({
       height={height}
       style={{ backgroundImage }}
       ref={observerRef}
-      className={clsx(styles.image, style)}
+      className={clsx(styles.image, className)}
       unoptimized={isDev}
     />
   );

@@ -1,6 +1,14 @@
-import { getStore } from '@netlify/blobs';
+const { getStore } = require('@netlify/blobs');
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
+  const secret = process.env.UPLOAD_SECRET;
+  if (secret && event.headers['x-upload-secret'] !== secret) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ message: 'Unauthorized' }),
+    };
+  }
+
   const siteID = process.env.NETLIFY_SITE_ID;
   const token = process.env.NETLIFY_ACCESS_TOKEN;
   const store = getStore({ name: "jupiter-images", siteID, token });

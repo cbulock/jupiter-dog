@@ -20,7 +20,7 @@ exports.handler = async (event, context) => {
     }
 
     // Trigger the background function by making a request to its URL
-    const backgroundFunctionUrl = 'https://jupiter.dog/.netlify/functions/sync-images-background';
+    const backgroundFunctionUrl = process.env.BACKGROUND_FUNCTION_URL || 'https://jupiter.dog/.netlify/functions/sync-images-background';
     await axios.get(backgroundFunctionUrl);
 
     return {

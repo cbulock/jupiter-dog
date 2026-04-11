@@ -1,6 +1,6 @@
 import imageList from "@/imageList.json";
 
-export const GET = async (request, response) => {
+export const GET = async (request) => {
   const searchParams = request.nextUrl.searchParams;
   const page = parseInt(searchParams.get("page")) || 1;
   const pageSize = parseInt(searchParams.get("pageSize")) || 10;

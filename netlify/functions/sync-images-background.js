@@ -229,16 +229,12 @@ exports.handler = async (event, context) => {
         }
 
         // Clean up temporary file
-        fs.unlink(tempFilePath, (err) => {
-          if (err) {
-            console.error(
-              `Error deleting temporary file: ${tempFilePath}`,
-              err
-            );
-          } else {
-            console.log(`Temporary file deleted: ${tempFilePath}`);
-          }
-        });
+        try {
+          await fs.promises.unlink(tempFilePath);
+          console.log(`Temporary file deleted: ${tempFilePath}`);
+        } catch (err) {
+          console.error(`Error deleting temporary file: ${tempFilePath}`, err);
+        }
       } else {
         console.log(`Image already exists: ${imageName}`);
       }

@@ -3,7 +3,7 @@ import exampleData from "./example-data.json";
 
 const isDev = process.env.NODE_ENV === "development";
 
-export const GET = async (request, response) => {
+export const GET = async (request) => {
   if (isDev) return Response.json(exampleData);
 
   const siteID = process.env.NETLIFY_SITE_ID;

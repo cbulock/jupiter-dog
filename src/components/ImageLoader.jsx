@@ -22,14 +22,19 @@ const ImageLoader = () => {
     const loadImages = async ({ page }) => {
       if (!isLoading && hasMoreResults) {
         setIsLoading(true);
-        const response = await fetch(
-          `/api/image/list?page=${page}&pageSize=8`
-        );
-        const data = await response.json();
-        imageList.value = [...imageList.value, ...data.data];
-        setHasMoreResults(data.hasNextPage);
-        setNextPage(page + 1);
-        setIsLoading(false);
+        try {
+          const response = await fetch(
+            `/api/image/list?page=${page}&pageSize=8`
+          );
+          const data = await response.json();
+          imageList.value = [...imageList.value, ...data.data];
+          setHasMoreResults(data.hasNextPage);
+          setNextPage(page + 1);
+        } catch (error) {
+          console.error("Error loading images:", error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 

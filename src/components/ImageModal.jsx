@@ -57,9 +57,14 @@ const ImageModal = () => {
   const fileName = modalImage.value?.fileName;
   useEffect(() => {
     setImageDetails({});
+    if (!fileName) return;
     const loadImageDetails = async () => {
-      const response = await fetch(`/api/image/details?image=${fileName}`);
-      setImageDetails(await response.json());
+      try {
+        const response = await fetch(`/api/image/details?image=${fileName}`);
+        setImageDetails(await response.json());
+      } catch (error) {
+        console.error("Error loading image details:", error);
+      }
     };
 
     loadImageDetails();
