@@ -26,12 +26,16 @@ const ImageLoader = () => {
           const response = await fetch(
             `/api/image/list?page=${page}&pageSize=8`
           );
+          if (!response.ok) {
+            throw new Error(`Failed to load images: ${response.status}`);
+          }
           const data = await response.json();
           imageList.value = [...imageList.value, ...data.data];
           setHasMoreResults(data.hasNextPage);
           setNextPage(page + 1);
         } catch (error) {
           console.error("Error loading images:", error);
+          setHasMoreResults(false);
         } finally {
           setIsLoading(false);
         }
