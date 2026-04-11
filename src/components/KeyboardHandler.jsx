@@ -6,10 +6,9 @@ import { useSignals } from "@preact/signals-react/runtime";
 import { modalImage } from "@/state";
 
 const handleKeyDown = (event) => {
-  event.preventDefault();
-
   switch (event.key) {
     case "Escape":
+      event.preventDefault();
       modalImage.value = null;
       break;
   }

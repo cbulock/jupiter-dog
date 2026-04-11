@@ -12,7 +12,7 @@ const JupiterHead = () => {
           src={"/jupiter.png"}
           width={64}
           height={64}
-          style={styles.image}
+          className={styles.image}
         />
       </div>
     </a>

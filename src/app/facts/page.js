@@ -8,7 +8,6 @@ import { merriweatherSans } from "@/fonts";
 export const metadata = {
   title: "Life of Jupiter - Facts",
   description: "Image gallery for the greatest pup in the world, Jupiter",
-  manifest: "/site.webmanifest",
 };
 
 const Facts = () => {
