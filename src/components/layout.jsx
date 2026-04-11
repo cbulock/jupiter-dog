@@ -1,3 +1,3 @@
-export default function Layout({ children }) {
+export default function ChildrenPassthrough({ children }) {
   return <>{children}</>;
 }
