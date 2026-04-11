@@ -2,7 +2,12 @@ const { getStore } = require('@netlify/blobs');
 
 exports.handler = async (event) => {
   const secret = process.env.UPLOAD_SECRET;
-  if (secret && event.headers['x-upload-secret'] !== secret) {
+  const headers = event.headers || {};
+  const headerKey = Object.keys(headers).find(
+    (k) => k.toLowerCase() === 'x-upload-secret'
+  );
+  const uploadSecret = headerKey ? headers[headerKey] : undefined;
+  if (secret && uploadSecret !== secret) {
     return {
       statusCode: 401,
       body: JSON.stringify({ message: 'Unauthorized' }),
