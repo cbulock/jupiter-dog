@@ -39,6 +39,6 @@
     "mime-types": "^2.1.35",
     "probe-image-size": "^7.2.3",
     "sharp": "^0.33.2",
-    "vite": "^6.4.1"
+    "vite": "^8.0.16"
   }
 }
