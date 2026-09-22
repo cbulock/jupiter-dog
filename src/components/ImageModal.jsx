@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSignals } from "@preact/signals-react/runtime";
 import Image from "./Image";
-import { imageList, modalImage, galleryHasMore, galleryError, galleryLoading, loadMoreImages, photoDate } from "@/state";
+import { imageList, modalImage, galleryHasMore, galleryError, galleryLoading, loadMoreImages, photoDate, photoUrl } from "@/state";
 import styles from "./ImageModal.module.css";
 
 export default function ImageModal() {
@@ -103,7 +103,7 @@ export default function ImageModal() {
             onTouchEnd={onTouchEnd} onTouchCancel={() => { touch.current = null; }}
           >
             <Image key={imageKey} className={styles.photo}
-              src={`/.netlify/functions/get-image?name=${encodeURIComponent(photo.fileName)}`}
+              src={photoUrl(photo)}
               alt={`Jupiter${date ? ` on ${date}` : ""}`}
               blurhash={photo.blurhash} width={photo.width} height={photo.height}
               sizes="(max-width: 700px) 95vw, 85vw"

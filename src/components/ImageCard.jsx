@@ -1,9 +1,9 @@
 import styles from "./ImageCard.module.scss";
 import Image from "./Image";
-import { modalImage, photoDate } from "@/state";
+import { modalImage, photoDate, photoUrl } from "@/state";
 
 export default function ImageCard({ imageData, index, lazyLoad = true }) {
-  const { blurhash, width, height, fileName, createdDate } = imageData;
+  const { blurhash, width, height, createdDate } = imageData;
   const date = photoDate(createdDate);
   return (
     <button
@@ -13,7 +13,7 @@ export default function ImageCard({ imageData, index, lazyLoad = true }) {
       aria-haspopup="dialog"
     >
       <span className={styles.photo}>
-        <Image src={`/.netlify/functions/get-image?name=${encodeURIComponent(fileName)}`}
+        <Image src={photoUrl(imageData)}
           blurhash={blurhash} width={width} height={height} lazyLoad={lazyLoad}
           sizes="(max-width: 479px) calc(100vw - 56px), (max-width: 700px) 45vw, (max-width: 1000px) 44vw, 30vw"
           alt={`Jupiter${date ? ` on ${date}` : ""}`} />

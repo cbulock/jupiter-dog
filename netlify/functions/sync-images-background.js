@@ -1,272 +1,36 @@
-const { Dropbox } = require("dropbox");
-const { getStore } = require("@netlify/blobs");
-const fetch = require("node-fetch");
-const mime = require("mime-types");
-const fs = require("fs");
-const path = require("path");
-const exifParser = require("exif-parser");
-const dayjs = require("dayjs");
-const probe = require("probe-image-size");
-const sharp = require("sharp");
-const { encode } = require("blurhash");
-const os = require("os");
+const { stores, json, put } = require('../lib/storage');
+const { internal, dispatch } = require('../lib/auth');
+const { connect, runSync } = require('../lib/dropbox');
+const { parse, reply } = require('../lib/http');
+const { withLock } = require('../lib/locks');
+const { queueSync, resumePending, pendingSyncs } = require('../lib/sync-queue');
+const { validId } = require('../lib/uploads');
 
-const maxImageSize = 4 * 1024 * 1024; // 4MB in bytes
-
-async function getEXIFData(filePath) {
-  try {
-    const buffer = await fs.promises.readFile(filePath);
-    const parser = exifParser.create(buffer);
-    const result = parser.parse();
-    return result.tags;
-  } catch (error) {
-    console.error("Error reading EXIF data:", error);
-    return null;
-  }
-}
-
-async function getImageDimensions(filePath, orientation) {
-  try {
-    const stream = fs.createReadStream(filePath);
-    const dimensions = await probe(stream);
-    stream.close();
-
-    // Check if orientation requires width and height to be swapped
-    if (orientation >= 5 && orientation <= 8) {
-      return { width: dimensions.height, height: dimensions.width };
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST' || !internal(event)) return reply(403, { error: 'Forbidden' });
+  const options = parse(event);
+  if (!validId(options.runId)) return reply(400, { error: 'Invalid sync ID' });
+  const s = stores();
+  const result = await withLock(s, 'dropbox-sync', async () => {
+    const job = await json(s.jobs, `sync-${options.runId}.json`);
+    if (!job || job.status === 'complete') return job || {};
+    const started = Date.now();
+    let completed;
+    try { completed = await runSync(s, await connect(), options); }
+    catch (error) {
+      completed = { ...job, status: 'error', errors: [{ name: 'Dropbox sync', error: error.message }], updatedAt: new Date().toISOString() };
+      await put(s.jobs, `sync-${options.runId}.json`, completed);
     }
-
-    return { width: dimensions.width, height: dimensions.height };
-  } catch (error) {
-    console.error(
-      `Error getting image dimensions for ${filePath}:`,
-      error.message
-    );
-    return { width: null, height: null };
-  }
-}
-
-async function getBlurhash(filePath, dimensions) {
-  try {
-    const processingReduction = 8;
-    const newDimensions = {
-      width: Math.round(dimensions.width / processingReduction),
-      height: Math.round(dimensions.height / processingReduction),
-    };
-    const buffer = await sharp(filePath)
-      .raw()
-      .ensureAlpha()
-      .resize(newDimensions.width, newDimensions.height)
-      .toBuffer();
-    return encode(
-      new Uint8ClampedArray(buffer),
-      newDimensions.width,
-      newDimensions.height,
-      4,
-      4
-    );
-  } catch (error) {
-    console.error(`Error getting blurhash for ${filePath}:`, error.message);
-  }
-}
-
-exports.handler = async (event, context) => {
-  try {
-    // Dropbox credentials
-    const clientId = process.env.DROPBOX_CLIENT_ID;
-    const clientSecret = process.env.DROPBOX_CLIENT_SECRET;
-    const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
-    const siteID = process.env.NETLIFY_SITE_ID;
-    const token = process.env.NETLIFY_ACCESS_TOKEN;
-
-    // Function to refresh the Dropbox access token
-    async function refreshAccessToken() {
-      const response = await fetch("https://api.dropboxapi.com/oauth2/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          grant_type: "refresh_token",
-          refresh_token: refreshToken,
-          client_id: clientId,
-          client_secret: clientSecret,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          `Error refreshing access token: ${data.error_description}`
-        );
-      }
-      return data.access_token;
-    }
-
-    // Get a new access token
-    const dropboxAccessToken = await refreshAccessToken();
-    const dropbox = new Dropbox({ accessToken: dropboxAccessToken });
-
-    // Define the Dropbox folder path
-    const folderPath = "/Jupiter Website";
-
-    // List the files in the Dropbox folder
-    const response = await dropbox.filesListFolder({ path: folderPath });
-    const files = response.result.entries;
-
-    // Filter the files to get only the image files
-    const imageFiles = files.filter((file) =>
-      file.name.match(/\.(jpg|jpeg|png|gif)$/i)
-    );
-
-    // Get the Netlify Blobs store for images and metadata
-    const imageStore = getStore({ name: "jupiter-images", siteID, token });
-    const metadataStore = getStore({
-      name: "jupiter-images-metadata",
-      siteID,
-      token,
-    });
-
-    // Download, process, and save the images and metadata to Netlify Blobs
-    for (const file of imageFiles) {
-      const imagePath = file.path_display;
-      const imageName = file.name;
-
-      // Check if the image file already exists in the Netlify Blobs store
-      const existingImage = await imageStore.get(imageName);
-      if (!existingImage) {
-        // Download the image from Dropbox
-        const response = await dropbox.filesDownload({ path: imagePath });
-        const imageData = Buffer.from(response.result.fileBinary, "binary");
-
-        // Process metadata
-        const tempFilePath = path.join(os.tmpdir(), imageName);
-        const fileStream = fs.createWriteStream(tempFilePath);
-        fileStream.write(imageData);
-        fileStream.end();
-        await new Promise((resolve) => fileStream.on("finish", resolve));
-
-        const exifData = await getEXIFData(tempFilePath);
-        const orientation = exifData?.Orientation || 1; // Default orientation is 1
-
-        // Resize the image if it exceeds the maximum size
-        let resizedImageData = imageData;
-        if (imageData.length > maxImageSize) {
-          const image = sharp(imageData);
-
-          // Rotate the image based on the orientation
-          switch (orientation) {
-            case 3:
-              image.rotate(180);
-              break;
-            case 6:
-              image.rotate(90);
-              break;
-            case 8:
-              image.rotate(-90);
-              break;
-            default:
-              break;
-          }
-
-          const metadata = await image.metadata();
-          const width = metadata.width;
-          const height = metadata.height;
-
-          // Calculate the new dimensions while maintaining the aspect ratio
-          let newWidth, newHeight;
-          if (width > height) {
-            newWidth = Math.sqrt(maxImageSize * (width / height));
-            newHeight = newWidth * (height / width);
-          } else {
-            newHeight = Math.sqrt(maxImageSize * (height / width));
-            newWidth = newHeight * (width / height);
-          }
-
-          resizedImageData = await image
-            .resize({
-              width: Math.round(newWidth),
-              height: Math.round(newHeight),
-              fit: "inside",
-              withoutEnlargement: true,
-            })
-            .toBuffer();
-        }
-
-        // Save the resized image to Netlify Blobs
-        await imageStore.set(imageName, resizedImageData, {
-          metadata: {
-            contentType: mime.lookup(imageName) || "application/octet-stream",
-          },
-        });
-        console.log(`Added new image: ${imageName}`);
-
-        if (exifData?.DateTimeOriginal) {
-          const createdDate = dayjs
-            .unix(exifData.DateTimeOriginal)
-            .toISOString();
-          const dimensions = await getImageDimensions(
-            tempFilePath,
-            orientation
-          );
-          const blurhash = await getBlurhash(tempFilePath, dimensions);
-
-          const metadata = {
-            blurhash,
-            fileName: imageName,
-            exifData,
-            createdDate,
-            ...dimensions,
-          };
-          const metadataKey = `${imageName}.json`;
-
-          // Save metadata to Netlify Blobs
-          await metadataStore.set(
-            metadataKey,
-            JSON.stringify(metadata, null, 2)
-          );
-          console.log(`Added metadata for image: ${imageName}`);
-        }
-
-        // Clean up temporary file
-        try {
-          await fs.promises.unlink(tempFilePath);
-          console.log(`Temporary file deleted: ${tempFilePath}`);
-        } catch (err) {
-          console.error(`Error deleting temporary file: ${tempFilePath}`, err);
-        }
-      } else {
-        console.log(`Image already exists: ${imageName}`);
+    // One full scan satisfies earlier duplicate notifications. Notifications received during
+    // the scan remain queued and trigger another pass after the lease is released.
+    if (completed.status === 'complete') for (const pending of await pendingSyncs(s)) {
+      if (Date.parse(pending.updatedAt) <= started && (!pending.repair || options.repair)) {
+        await put(s.jobs, `sync-${pending.id}.json`, { ...completed, id: pending.id });
       }
     }
-    
-    // Trigger a new build on the Netlify app
-    const netlifyApiUrl = `https://api.netlify.com/api/v1/sites/${siteID}/builds`;
-
-    const buildResponse = await fetch(netlifyApiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({}),
-    });
-
-    if (buildResponse.ok) {
-      console.log("Build triggered successfully");
-    } else {
-      console.error("Error triggering build:", buildResponse.statusText);
-    }
-
-    return {
-      statusCode: 200,
-      body: "Images and metadata synced successfully",
-    };
-  } catch (error) {
-    console.error("Error syncing images and metadata:", error);
-    return {
-      statusCode: 500,
-      body: "Error syncing images and metadata",
-    };
-  }
+    return completed;
+  });
+  if (result.remaining) await queueSync(s, dispatch, options.repair === true);
+  else await resumePending(s, dispatch);
+  return reply(200, result);
 };

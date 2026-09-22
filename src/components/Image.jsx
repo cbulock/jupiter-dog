@@ -38,7 +38,9 @@ export default function Image({ alt = "", blurhash, src, width, height, lazyLoad
           sizes={sizes} loading={lazyLoad ? "lazy" : "eager"}
           className={clsx(styles.image, loaded && styles.loaded)}
           onLoad={() => setLoaded(true)} onError={() => { setFailed(true); onError?.(); }}
-          unoptimized={process.env.NODE_ENV === "development"}
+          // The importer already creates the delivery-sized image. Serve that version directly
+          // so function URLs do not depend on a second Next.js image-optimization request.
+          unoptimized
         />
       ) : (
         <span className={styles.failed} role="img" aria-label={`${alt} — unavailable`}>

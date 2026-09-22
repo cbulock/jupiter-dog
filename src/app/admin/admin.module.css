@@ -1,0 +1,45 @@
+.manager { max-width: 1160px; margin: 0 auto; padding: 48px 28px 72px; color: #263e38; }
+.heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 30px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .75rem; font-weight: 700; }
+.heading h1 { font-family: var(--font-heading), Georgia, serif; font-size: clamp(2.2rem, 5vw, 4rem); margin: 8px 0; }
+.heading h1 span { color: #da6c4b; }
+.manager h2 { margin: 0 0 12px; font-size: 1.3rem; }
+.manager button, .fileLabel { min-height: 44px; background: #294d43; color: white; border: 1px solid #294d43; border-radius: 8px; padding: 11px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+.manager button:disabled { opacity: .6; cursor: wait; }
+.manager button.secondary { background: transparent; color: #294d43; border-color: #aab9ae; }
+.manager input:not([type=checkbox]):not([type=file]) { display: block; width: 100%; min-height: 44px; padding: 10px 12px; font: inherit; border: 1px solid #aab9ae; border-radius: 6px; background: #fffefa; color: #263e38; margin: 7px 0 12px; box-sizing: border-box; }
+.manager label { font-size: .9rem; font-weight: 600; }
+.manager :is(button,input,summary):focus-visible { outline: 3px solid #ca694b; outline-offset: 3px; }
+.panel { background: #fffdf7; border: 1px solid #d9ddd0; border-radius: 14px; padding: 25px; margin-bottom: 24px; }
+.panel > p { line-height: 1.6; }
+.login { max-width: 420px; }
+.login button { width: 100%; margin-top: 8px; }
+.fileLabel { display: inline-flex; flex-direction: column; gap: 12px; max-width: 100%; box-sizing: border-box; }
+.fileLabel input { font: inherit; font-size: .85rem; max-width: 100%; }
+.caption { color: #5a6b62; font-size: .8rem; line-height: 1.5; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.notice, .error { padding: 15px 18px; border-radius: 8px; line-height: 1.5; }
+.notice { background: #e2eedf; }
+.error { background: #ffe4dc; color: #772e1d; }
+.progress, .activity ul { list-style: none; padding: 0; margin-bottom: 0; }
+.progress li, .activity li { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid #d9ddd0; font-size: .85rem; overflow-wrap: anywhere; }
+.activity { margin-top: 24px; }
+.activity li span { display: block; margin-top: 6px; }
+.activity button { align-self: start; }
+.manager summary { cursor: pointer; padding: 10px 0; }
+.audit { margin-top: 20px; }
+.audit pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 350px; overflow: auto; font-size: .8rem; }
+.filters { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin: 30px 0 20px; }
+.filters > label:first-child { flex: 1; min-width: 190px; }
+.checkbox { display: flex; align-items: center; gap: 8px; }
+.checkbox input { width: 20px; height: 20px; accent-color: #294d43; }
+.filters > span { color: #5a6b62; font-size: .9rem; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 22px; }
+.photo { min-width: 0; background: #fffdf7; border: 1px solid #d9ddd0; border-radius: 12px; overflow: hidden; }
+.photo > img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #e9e9db; }
+.photoBody { padding: 18px; }
+.photo h3 { font-size: .95rem; margin: 0; overflow-wrap: anywhere; }
+.photo .actions { gap: 8px; }
+.photo button { font-size: .8rem; padding: 10px 12px; }
+@media (max-width: 850px) { .grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 540px) { .manager { padding: 26px 16px 45px; } .heading { align-items: flex-start; } .heading button { font-size: .8rem; padding: 9px 12px; } .panel { padding: 20px; } .grid { grid-template-columns: 1fr; } .filters { gap: 12px; } .filters > label:first-child { flex-basis: 100%; } .progress li { flex-direction: column; gap: 6px; } }

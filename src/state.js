@@ -47,3 +47,7 @@ export function photoDate(value) {
     month: "long", day: "numeric", year: "numeric", timeZone: "UTC",
   });
 }
+
+export function photoUrl(photo) {
+  return `/.netlify/functions/get-image?name=${encodeURIComponent(photo.fileName)}${photo.version ? `&v=${encodeURIComponent(photo.version)}` : ''}`;
+}

@@ -1,37 +1,17 @@
-const axios = require('axios');
+const { validWebhook } = require('../lib/dropbox');
+const { dispatch } = require('../lib/auth');
+const { reply, errorReply } = require('../lib/http');
+const { stores } = require('../lib/storage');
+const { queueSync } = require('../lib/sync-queue');
 
-exports.handler = async (event, context) => {
-  try {
-    // Check if the request method is GET
-    if (event.httpMethod === 'GET') {
-      // Check if the 'challenge' parameter exists in the query string
-      const challenge = event.queryStringParameters.challenge;
-      if (challenge) {
-        // Respond to the Dropbox webhook verification challenge
-        return {
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'text/plain',
-            'X-Content-Type-Options': 'nosniff',
-          },
-          body: challenge,
-        };
-      }
-    }
-
-    // Trigger the background function by making a request to its URL
-    const backgroundFunctionUrl = process.env.BACKGROUND_FUNCTION_URL || 'https://jupiter.dog/.netlify/functions/sync-images-background';
-    await axios.get(backgroundFunctionUrl);
-
-    return {
-      statusCode: 200,
-      body: 'Function executed successfully',
-    };
-  } catch (error) {
-    console.error('Error executing function:', error);
-    return {
-      statusCode: 500,
-      body: 'Error executing function',
-    };
+exports.handler = async (event) => {
+  if (event.httpMethod === 'GET') {
+    const challenge = event.queryStringParameters?.challenge;
+    if (typeof challenge !== 'string' || !/^[a-zA-Z0-9_-]{1,512}$/.test(challenge)) return reply(400, { error: 'Missing or invalid challenge' });
+    return { statusCode: 200, headers: { 'Content-Type': 'text/plain', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' }, body: challenge };
   }
+  if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
+  if (!validWebhook(event)) return reply(403, { error: 'Invalid Dropbox signature' });
+  try { await queueSync(stores(), dispatch); return reply(200, { accepted: true }); }
+  catch (error) { return errorReply(error); }
 };
