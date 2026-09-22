@@ -7,11 +7,13 @@ import { useSignals } from "@preact/signals-react/runtime";
 import ImageCard from "./ImageCard";
 import ImageLoader from "./ImageLoader";
 import ImageModal from "./ImageModal";
-import { imageList, modalImage } from "@/state";
+import { imageList, modalImage, initializeGallery } from "@/state";
 import styles from "./Home.module.css";
 
-export default function Home() {
+export default function Home({ initialPage }) {
   useSignals();
+  const photos = imageList.value.length ? imageList.value : initialPage?.data || [];
+  useEffect(() => { initializeGallery(initialPage); }, [initialPage]);
   useEffect(() => () => { modalImage.value = null; }, []);
   return (
     <>
@@ -24,7 +26,7 @@ export default function Home() {
         </div>
         <div className={styles.portrait}>
           <div className={styles.portraitCircle} />
-          <NextImage src="/jupiter.png" alt="Jupiter, ears out and ready for his close-up" width={340} height={340} priority className={styles.dog} />
+          <NextImage src="/jupiter.png" alt="Jupiter, ears out and ready for his close-up" width={340} height={340} sizes="(max-width: 479px) 106px, (max-width: 700px) 135px, (max-width: 1000px) 240px, 300px" priority className={styles.dog} />
           <span className={styles.spark} aria-hidden="true">✳</span>
           <span className={styles.hello} aria-hidden="true">oh, hi!<svg viewBox="0 0 80 55" fill="none"><path d="M6 3C62 0 67 16 45 45M44 31L43 46L58 43" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
           <span className={styles.sticker}>100%<br /><strong>good boy</strong></span>
@@ -37,7 +39,7 @@ export default function Home() {
           <span className={styles.sort}><span aria-hidden="true">↓</span> Newest first</span>
         </div>
         <div className={styles.imageContainer}>
-          {imageList.value.map((photo, index) => <ImageCard key={photo.fileName} imageData={photo} index={index} lazyLoad={index > 2} />)}
+          {photos.map((photo, index) => <ImageCard key={photo.fileName} imageData={photo} index={index} lazyLoad={index > 0} />)}
         </div>
         <ImageLoader />
       </section>

@@ -1,6 +1,5 @@
 .frame { display: block; position: relative; width: 100%; overflow: hidden; background-color: #ede5d5; background-size: cover; background-position: center; }
-.image { display: block; width: 100%; height: auto; opacity: 0; transition: opacity .25s ease; }
-.loaded { opacity: 1; }
+.image { display: block; width: 100%; height: auto; }
 .failed { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; color: var(--muted); text-align: center; font-size: 14px; }
 .failed > span { font-size: 36px; color: var(--teal); }
 .failed small { font-size: 11px; }

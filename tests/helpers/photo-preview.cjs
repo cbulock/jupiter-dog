@@ -28,10 +28,35 @@ async function main() {
     importedAt: '2026-09-22T12:00:00Z', source: { kind: 'admin', lastModified: '2020-07-04T12:00:00Z' } });
   await photos.processPhoto(s, { fileName: 'preview-jupiter-2.jpg', displayName: 'A very good dog.jpg', bytes: photoBytes,
     importedAt: '2026-09-22T12:00:00Z', source: { kind: 'dropbox', clientModified: '2021-08-06T12:00:00Z' } });
+  // More than two pages exercises automatic loading and the final partial page.
+  // Reuse the immutable test image bytes; only identities/dates need to differ.
+  const template = await storage.json(s.metadata, 'preview-jupiter.jpg.json');
+  for (let index = 1; index <= 21; index += 1) {
+    const fileName = `preview-pagination-${index}.jpg`;
+    const date = `2019-01-${String(index).padStart(2, '0')}T12:00:00.000Z`;
+    await storage.put(s.metadata, `${fileName}.json`, { ...template, fileName,
+      displayName: `Pagination photo ${index}.jpg`, automaticDate: date, createdDate: date });
+  }
   const handlers = Object.fromEntries(['photo-admin', 'get-image', 'upload-image', 'process-upload-background', 'sync-images-webhook'].map((name) => [name, require(`../../netlify/functions/${name}`).handler]));
   const web = spawn(process.execPath, [require.resolve('next/dist/bin/next'), 'start', '-p', '8892'], { stdio: 'inherit', env: process.env, windowsHide: true });
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost:8890');
+    // Netlify's adapter sends next/image to its Image CDN in production. Emulate
+    // that boundary for local function images, which Next's internal router cannot dispatch.
+    const imageSource = url.pathname === '/_next/image' && url.searchParams.get('url');
+    if (imageSource && imageSource.startsWith('/.netlify/functions/get-image?')) {
+      try {
+        const source = new URL(imageSource, 'http://localhost:8890');
+        const result = await handlers['get-image']({ httpMethod: 'GET', queryStringParameters: Object.fromEntries(source.searchParams) });
+        if (result.statusCode !== 200) { res.writeHead(result.statusCode); res.end(result.body); return; }
+        const width = Math.min(3840, Math.max(16, Number(url.searchParams.get('w')) || 640));
+        const bytes = await require('sharp')(Buffer.from(result.body, 'base64'))
+          .resize({ width, withoutEnlargement: true }).webp({ quality: 75 }).toBuffer();
+        res.writeHead(200, { 'Content-Type': 'image/webp', 'Cache-Control': 'public, max-age=60' });
+        res.end(bytes);
+      } catch (error) { res.writeHead(500); res.end(error.message); }
+      return;
+    }
     if (url.pathname.startsWith('/.netlify/functions/')) {
       const name = url.pathname.split('/').pop();
       if (!handlers[name]) { res.writeHead(404); res.end('Not available in local preview'); return; }

@@ -14,8 +14,8 @@ export default function ImageCard({ imageData, index, lazyLoad = true }) {
     >
       <span className={styles.photo}>
         <Image src={photoUrl(imageData)}
-          blurhash={blurhash} width={width} height={height} lazyLoad={lazyLoad}
-          sizes="(max-width: 479px) calc(100vw - 56px), (max-width: 700px) 45vw, (max-width: 1000px) 44vw, 30vw"
+          blurhash={blurhash} width={width} height={height} lazyLoad={lazyLoad} priority={index === 0}
+          sizes="(max-width: 479px) calc(100vw - 58px), (max-width: 700px) calc((100vw - 94px) / 2), (max-width: 1000px) calc((100vw - 150px) / 2), (max-width: 1384px) calc((100vw - 198px) / 3), 396px"
           alt={`Jupiter${date ? ` on ${date}` : ""}`} />
         <span className={styles.expand} aria-hidden="true">↗</span>
       </span>

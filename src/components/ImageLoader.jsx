@@ -15,7 +15,7 @@ export default function ImageLoader() {
   useEffect(() => {
     if (viewerOpen || loading || error || !hasMore) return;
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) loadMoreImages();
+      if (entry.isIntersecting) loadMoreImages({ automatic: true });
     }, { rootMargin: "300px" });
     if (sentinel.current) observer.observe(sentinel.current);
     return () => observer.disconnect();

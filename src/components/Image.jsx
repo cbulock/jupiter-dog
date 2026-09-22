@@ -6,7 +6,7 @@ import { decode } from "blurhash";
 import clsx from "clsx";
 import styles from "./Image.module.css";
 
-export default function Image({ alt = "", blurhash, src, width, height, lazyLoad = false, className, sizes, onError }) {
+export default function Image({ alt = "", blurhash, src, width, height, lazyLoad = false, priority = false, className, sizes, onError }) {
   const [background, setBackground] = useState();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -15,7 +15,7 @@ export default function Image({ alt = "", blurhash, src, width, height, lazyLoad
     setLoaded(Boolean(imageRef.current?.complete && imageRef.current?.naturalWidth));
     setFailed(false);
     setBackground(undefined);
-    if (!blurhash) return;
+    if (!blurhash || imageRef.current?.complete) return;
     try {
       // A tiny placeholder is sufficient; avoid decoding full-resolution canvases.
       const pixels = decode(blurhash, 32, 32);
@@ -35,12 +35,9 @@ export default function Image({ alt = "", blurhash, src, width, height, lazyLoad
         <NextImage
           ref={imageRef}
           src={src} alt={alt} width={width} height={height}
-          sizes={sizes} loading={lazyLoad ? "lazy" : "eager"}
-          className={clsx(styles.image, loaded && styles.loaded)}
+          sizes={sizes} priority={priority} fetchPriority={priority ? "high" : undefined} loading={lazyLoad ? "lazy" : "eager"}
+          className={styles.image}
           onLoad={() => setLoaded(true)} onError={() => { setFailed(true); onError?.(); }}
-          // The importer already creates the delivery-sized image. Serve that version directly
-          // so function URLs do not depend on a second Next.js image-optimization request.
-          unoptimized
         />
       ) : (
         <span className={styles.failed} role="img" aria-label={`${alt} — unavailable`}>

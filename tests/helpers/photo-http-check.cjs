@@ -5,6 +5,21 @@ const sharp = require('sharp');
 const base = 'http://localhost:8890';
 
 async function main() {
+  const paginated = [];
+  for (let page = 1; page <= 3; page += 1) {
+    const result = await fetch(`${base}/api/image/list?page=${page}&pageSize=9`);
+    assert.equal(result.status, 200);
+    assert.equal(result.headers.get('netlify-vary'), 'query=page|pageSize');
+    const body = await result.json();
+    assert.equal(body.currentPage, page);
+    assert.equal(body.hasNextPage, page < 3);
+    assert.equal(body.data.length, page < 3 ? 9 : 5);
+    paginated.push(...body.data.map((photo) => photo.fileName));
+  }
+  assert.equal(new Set(paginated).size, 23);
+  const smallerPage = await (await fetch(`${base}/api/image/list?page=2&pageSize=1`)).json();
+  assert.equal(smallerPage.currentPageSize, 1);
+  assert.equal(smallerPage.data[0].fileName, paginated[1]);
   let cookie = '';
   async function admin(action, data, method = data === undefined ? 'GET' : 'POST', query = '', authorized = true) {
     const binary = Buffer.isBuffer(data);

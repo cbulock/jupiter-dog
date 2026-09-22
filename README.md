@@ -17,7 +17,7 @@ There are two sources: files placed directly inside Dropbox's `/Jupiter Website`
 
 Both sources use the same processor. It reads EXIF if available, preserves a private original, auto-orients the image, and creates a JPEG gallery version (up to 2560 pixels and 4 MiB) with a matching preview and dimensions. GIF originals retain animation; the gallery shows a still frame. Photos may be up to 50 MiB and 100 megapixels.
 
-The gallery reads completed metadata directly from Netlify Blobs. Adding photos or correcting dates does **not** trigger a deployment. A fresh gallery load sees changes within 30 seconds after successful processing. An already-open gallery retains its loaded collection until refreshed.
+The gallery reads completed metadata directly from Netlify Blobs. Adding photos or correcting dates does **not** trigger a deployment. The first page is rendered on the server with a runtime catalog cache that revalidates every 30 seconds; pagination has a separate 30-second edge cache. An already-open gallery retains its loaded collection until refreshed. Gallery cards use responsive Next.js images (Netlify Image CDN in production), with the first photo preloaded and later photos lazy-loaded.
 
 Date precedence is: manual correction, EXIF capture date, EXIF creation date, source file timestamp, first import time. Dropbox uses `client_modified` followed by `server_modified`; browser uploads use `File.lastModified`. File timestamps can describe an export or save rather than when the photo was taken. The admin page marks these estimates and lets you correct them. Clearing a correction restores the automatic date. Corrections are stored separately and survive subsequent syncs.
 
@@ -62,4 +62,4 @@ Use an isolated Netlify test deployment to verify the actual platform integratio
 5. Run audit and repair against test image-only records. Confirm signed webhook dispatch, background retries, and hourly cleanup in Netlify logs.
 6. Check `/`, `/facts`, and `/admin` at 320, 390, 768, and 1440 pixels. Check keyboard focus, date forms, upload progress/errors, the gallery viewer, and image retry behavior.
 
-Local/mocked integration success does not establish that production credentials, webhook configuration, or Netlify background execution are working.
+The local preview emulates Image CDN resizing for function-backed images with Sharp; production CDN behavior must still be checked on Netlify. Local/mocked integration success does not establish that production credentials, webhook configuration, or Netlify background execution are working.
