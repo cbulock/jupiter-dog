@@ -105,14 +105,20 @@ test('corrupt image processing leaves a retryable error and no gallery entry', a
 test('Dropbox paginates, repairs invisible images, isolates failures, and detects revisions', async () => {
   const s = memoryStores(); const bytes = await image();
   const files = [
-    { '.tag': 'file', id: 'id:1', name: 'snap.jpg', rev: '1', size: bytes.length, client_modified: '2020-01-01T00:00:00Z' },
-    { '.tag': 'file', id: 'id:bad', name: 'bad.jpg', rev: '1', size: 20 },
-    { '.tag': 'file', id: 'id:2', name: 'later.jpg', rev: '1', size: bytes.length },
+    { '.tag': 'file', id: 'id:1', name: 'snap.jpg', rev: '111111111', size: bytes.length, client_modified: '2020-01-01T00:00:00Z' },
+    { '.tag': 'file', id: 'id:bad', name: 'bad.jpg', rev: 'badbadbad', size: 20 },
+    { '.tag': 'file', id: 'id:2', name: 'later.jpg', rev: '222222222', size: bytes.length },
   ];
   let downloads = 0; let pages = 0;
   const client = { filesListFolder: async () => ({ result: { entries: files.slice(0, 2), has_more: true, cursor: 'next' } }),
     filesListFolderContinue: async () => { pages++; return { result: { entries: files.slice(2), has_more: false } }; },
-    filesDownload: async ({ path }) => { downloads++; if (path === 'id:bad') throw new Error('Unavailable'); return { result: { fileBinary: bytes } }; } };
+    filesDownload: async (args) => {
+      downloads++;
+      assert.deepEqual(Object.keys(args), ['path']);
+      assert.match(args.path, /^rev:[0-9a-f]{9,}$/);
+      if (args.path === 'rev:badbadbad') throw new Error('Unavailable');
+      return { result: { fileBinary: bytes } };
+    } };
   await s.images.set('snap.jpg', bytes); // The original Snapchat failure: bytes exist without metadata.
   const before = await dropbox.audit(s);
   assert.deepEqual(before.missingMetadata, ['snap.jpg']);
@@ -122,9 +128,9 @@ test('Dropbox paginates, repairs invisible images, isolates failures, and detect
   assert.equal((await json(s.metadata, 'snap.jpg.json')).dateSource, 'dropbox-client');
   const repeat = await dropbox.runSync(s, client);
   assert.equal(repeat.unchanged, 2); assert.equal(downloads, 4);
-  files[0].rev = '2'; files[0].name = 'renamed.jpg';
+  files[0].rev = '333333333'; files[0].name = 'renamed.jpg';
   const changed = await dropbox.runSync(s, client);
-  assert.equal(changed.updated, 1); assert.equal((await json(s.metadata, 'snap.jpg.json')).source.rev, '2');
+  assert.equal(changed.updated, 1); assert.equal((await json(s.metadata, 'snap.jpg.json')).source.rev, '333333333');
   assert.equal((await photos.catalog(s)).length, 2);
 });
 
