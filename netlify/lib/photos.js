@@ -1,5 +1,5 @@
 const crypto = require('node:crypto');
-const { entries, json, put } = require('./storage');
+const { readJsonEntries, put } = require('./storage');
 
 const MAX_BYTES = 50 * 1024 * 1024;
 const CHUNK_BYTES = 3 * 1024 * 1024;
@@ -39,11 +39,14 @@ function publicPhoto(record, override) {
     ...(record.version ? { version: record.version } : {}) };
 }
 async function catalog(s, admin = false) {
+  const [records, corrections] = await Promise.all([
+    readJsonEntries(s.metadata), readJsonEntries(s.overrides),
+  ]);
+  const overrides = new Map(corrections.map(({ key, value }) => [key, value]));
   const rows = [];
-  for (const entry of await entries(s.metadata)) {
-    const record = await json(s.metadata, entry.key);
+  for (const { value: record } of records) {
     if (!record?.fileName) continue;
-    const override = await json(s.overrides, `${record.fileName}.json`);
+    const override = overrides.get(`${record.fileName}.json`);
     const photo = publicPhoto(record, override);
     if (!photo) continue;
     rows.push(admin ? { ...photo, displayName: record.displayName || record.fileName,

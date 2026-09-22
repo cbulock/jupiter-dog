@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { photoDate, photoUrl } from '@/state';
 import styles from './admin.module.css';
 
@@ -60,12 +60,23 @@ export default function PhotoManager() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState([]);
   const [report, setReport] = useState(null);
+  const refreshRequest = useRef(null);
   const onError = useCallback((problem) => {
     setError(problem.message);
     if (problem.status === 401) setSession({ configured: true, authenticated: false });
   }, []);
   const refresh = useCallback(async (notice) => {
-    const data = await api('photos'); setPhotos(data.photos); setJobs(data.jobs);
+    // Queue explicit refreshes so a save always gets a read started after its write.
+    const previous = refreshRequest.current;
+    const request = (async () => {
+      if (previous) await previous.catch(() => {});
+      return api('photos');
+    })();
+    refreshRequest.current = request;
+    let data;
+    try { data = await request; }
+    finally { if (refreshRequest.current === request) refreshRequest.current = null; }
+    setPhotos(data.photos); setJobs(data.jobs);
     setProgress((rows) => rows.map((row) => {
       const job = data.jobs.find((item) => item.id === row.id);
       return job?.status === 'published' ? { ...row, status: 'Published' }
@@ -76,9 +87,16 @@ export default function PhotoManager() {
   useEffect(() => { api('session').then(setSession).catch(onError); }, [onError]);
   useEffect(() => {
     if (!session?.authenticated) return;
-    refresh().catch(onError);
-    const interval = setInterval(() => { if (!document.hidden) refresh().catch(onError); }, 5000);
-    return () => clearInterval(interval);
+    let stopped = false;
+    let timer;
+    async function poll() {
+      try {
+        if (!document.hidden && !refreshRequest.current) await refresh();
+      } catch (problem) { if (!stopped) onError(problem); }
+      if (!stopped) timer = setTimeout(poll, 5000);
+    }
+    poll();
+    return () => { stopped = true; clearTimeout(timer); };
   }, [session?.authenticated, refresh, onError]);
 
   async function signIn(event) {

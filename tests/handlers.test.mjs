@@ -69,3 +69,42 @@ test('retired uploads, worker authorization and webhook verification reject unsa
   const challenge = await webhook({ httpMethod: 'GET', queryStringParameters: { challenge: 'test_123' } });
   assert.equal(challenge.statusCode, 200); assert.equal(challenge.body, 'test_123');
 });
+
+test('large admin collections read photos and activity concurrently and only fetch existing corrections', async (t) => {
+  for (let i = 0; i < 130; i++) {
+    await storage.put(s.metadata, `bulk-${i}.json`, { fileName: `bulk-${i}`, width: 20, height: 10,
+      automaticDate: '2020-01-01', dateSource: 'exif-original', exifData: { GPSLatitude: 40 } });
+    await storage.put(s.jobs, `bulk-job-${i}`, { id: `bulk-job-${i}`, updatedAt: new Date(i * 1000).toISOString() });
+  }
+  await storage.put(s.overrides, 'bulk-0.json', { createdDate: '2026-09-22' });
+  await storage.put(s.overrides, 'removed-photo.json', { createdDate: '2026-09-23' });
+  const active = { metadata: 0, jobs: 0, overrides: 0 };
+  const peak = { ...active };
+  const correctionKeys = [];
+  let activityAndPhotosOverlap = false;
+  for (const name of Object.keys(active)) {
+    const get = s[name].get.bind(s[name]);
+    t.mock.method(s[name], 'get', async (key, options) => {
+      active[name]++; peak[name] = Math.max(peak[name], active[name]);
+      activityAndPhotosOverlap ||= active.jobs > 0 && active.metadata > 0;
+      if (name === 'overrides') correctionKeys.push(key);
+      try {
+        await new Promise((resolve) => setImmediate(resolve));
+        return await get(key, options);
+      } finally { active[name]--; }
+    });
+  }
+  const response = await admin(event('photos', 'GET', undefined, true));
+  assert.equal(response.statusCode, 200);
+  const { photos, jobs } = JSON.parse(response.body);
+  assert.equal(photos.filter((photo) => photo.fileName.startsWith('bulk-')).length, 130);
+  assert.equal(photos[0].fileName, 'bulk-0');
+  assert.equal(photos[0].manualDate, '2026-09-22');
+  assert.equal(photos[0].exifData, undefined);
+  assert.deepEqual(correctionKeys.sort(), ['bulk-0.json', 'removed-photo.json']);
+  assert.equal(jobs.length, 100);
+  assert.equal(jobs[0].id, 'bulk-job-129');
+  assert.equal(jobs[99].id, 'bulk-job-30');
+  assert.ok(activityAndPhotosOverlap);
+  for (const name of ['metadata', 'jobs']) assert.ok(peak[name] > 1 && peak[name] <= 16);
+});

@@ -1,4 +1,4 @@
-const { stores, entries, json, put } = require('../lib/storage');
+const { stores, readJsonEntries, json, put } = require('../lib/storage');
 const { reply, parse, body, fail, errorReply } = require('../lib/http');
 const auth = require('../lib/auth');
 const { catalog, calendarDate } = require('../lib/photos');
@@ -21,9 +21,9 @@ exports.handler = async (event) => {
     if (action === 'logout' && method === 'POST') return reply(200, { authenticated: false }, { 'Set-Cookie': auth.cookie('', local) });
     const s = stores();
     if (action === 'photos' && method === 'GET') {
-      const jobs = [];
-      for (const entry of await entries(s.jobs)) { const job = await json(s.jobs, entry.key); if (job) jobs.push(job); }
-      return reply(200, { photos: await catalog(s, true), jobs: jobs.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 100) });
+      const [photos, activity] = await Promise.all([catalog(s, true), readJsonEntries(s.jobs)]);
+      const jobs = activity.map(({ value }) => value).filter(Boolean);
+      return reply(200, { photos, jobs: jobs.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 100) });
     }
     if (action === 'date' && method === 'POST') {
       const data = parse(event);
