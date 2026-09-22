@@ -49,6 +49,27 @@ test('EXIF capture date and orientation are extracted before converting', async 
   assert.equal(record.width, 40); assert.equal(record.height, 80);
 });
 
+test('GPS survives import and reprocessing even without an EXIF capture date', async () => {
+  const gps = { GPSLatitudeRef: 'N', GPSLatitude: 42.5, GPSLongitudeRef: 'W', GPSLongitude: -84.75,
+    GPSAltitudeRef: 0, GPSAltitude: 228 };
+  for (const format of ['jpeg', 'png', 'webp']) {
+    const s = memoryStores();
+    const bytes = await sharp(await image(format)).withMetadata({ exif: { IFD3: {
+      GPSLatitudeRef: 'N', GPSLatitude: '42/1 30/1 0/1', GPSLongitudeRef: 'W', GPSLongitude: '84/1 45/1 0/1',
+      GPSAltitudeRef: '0', GPSAltitude: '228/1',
+    } } }).toBuffer();
+    const input = { fileName: `location.${format}`, bytes, importedAt, source: { kind: 'admin', lastModified: '2020-05-04' } };
+    await photos.processPhoto(s, input);
+    const record = await photos.processPhoto(s, input);
+    const stored = await json(s.metadata, `${input.fileName}.json`);
+    for (const [key, value] of Object.entries(gps)) assert.equal(stored.exifData[key], value);
+    assert.equal(record.dateSource, 'file-modified');
+    assert.deepEqual(Buffer.from(await s.originals.get(record.originalKey, { type: 'arrayBuffer' })), bytes);
+    assert.equal((await sharp(Buffer.from(await s.images.get(record.imageKey, { type: 'arrayBuffer' }))).metadata()).exif, undefined);
+    assert.equal((await photos.catalog(s))[0].exifData, undefined);
+  }
+});
+
 test('corrections survive reprocessing; clearing restores automatic date; output order is stable', async () => {
   const s = memoryStores(); const bytes = await image();
   await photos.processPhoto(s, { fileName: 'b.jpg', bytes, importedAt });
@@ -137,11 +158,13 @@ test('Dropbox paginates, repairs invisible images, isolates failures, and detect
 test('migration preserves legacy dates; recovery reports fallback dates without deleting originals', async () => {
   const s = memoryStores(); const bytes = await image();
   await s.images.set('legacy.jpg', bytes); await s.images.set('orphan.png', await image('png'));
-  await put(s.metadata, 'legacy.jpg.json', { fileName: 'legacy.jpg', createdDate: '2018-01-01T00:00:00Z', width: 80, height: 40 });
+  const legacyExif = { GPSLatitude: 42.5, GPSLongitude: -84.75, GPSAltitude: 228 };
+  await put(s.metadata, 'legacy.jpg.json', { fileName: 'legacy.jpg', createdDate: '2018-01-01T00:00:00Z', width: 80, height: 40, exifData: legacyExif });
   const client = { filesListFolder: async () => ({ result: { entries: [{ '.tag': 'file', id: 'legacy', name: 'legacy.jpg', rev: '1' }], has_more: false } }),
     filesDownload: async () => { throw new Error('Legacy photo should not be downloaded'); } };
   await dropbox.runSync(s, client, { repair: true });
   assert.equal((await json(s.metadata, 'legacy.jpg.json')).createdDate, '2018-01-01T00:00:00Z');
+  assert.deepEqual((await json(s.metadata, 'legacy.jpg.json')).exifData, legacyExif);
   assert.equal((await json(s.metadata, 'orphan.png.json')).dateSource, 'imported');
   assert.ok(await s.images.getMetadata('orphan.png'));
   assert.equal((await dropbox.audit(s)).fallbackDates.length, 1);

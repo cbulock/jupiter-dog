@@ -62,24 +62,33 @@ async function processPhoto(s, { fileName, displayName, bytes, source = {}, impo
   const sharp = require('sharp');
   const input = sharp(bytes, { limitInputPixels: 100000000, animated: false });
   const info = await input.metadata();
-  if (!FORMATS.has(info.format)) throw new Error('Use JPEG, PNG, GIF, or WebP photos');
+  const heic = info.format === 'heif' && info.compression === 'hevc';
+  if (!FORMATS.has(info.format) && !heic) throw new Error('Use JPEG, PNG, GIF, WebP, or HEIC/HEIF photos');
   let exif = {};
   try { exif = require('exif-parser').create(bytes).parse().tags || {}; } catch { /* EXIF is optional. */ }
-  // Sharp exposes EXIF from PNG/WebP as an EXIF segment, too.
+  // Sharp exposes EXIF from HEIC/PNG/WebP as an EXIF segment, too.
   if (!exif.DateTimeOriginal && info.exif) {
     try {
+      // PNG eXIf chunks can contain bare TIFF bytes without the JPEG EXIF prefix.
+      const prefix = Buffer.from('Exif\0\0');
+      const payload = info.exif.subarray(0, 6).equals(prefix) ? info.exif : Buffer.concat([prefix, info.exif]);
       const segment = Buffer.alloc(4); segment[0] = 0xff; segment[1] = 0xe1;
-      segment.writeUInt16BE(info.exif.length + 2, 2);
-      exif = require('exif-parser').create(Buffer.concat([Buffer.from([0xff, 0xd8]), segment, info.exif, Buffer.from([0xff, 0xd9])])).parse().tags || exif;
+      segment.writeUInt16BE(payload.length + 2, 2);
+      const tags = require('exif-parser').create(Buffer.concat([Buffer.from([0xff, 0xd8]), segment, payload, Buffer.from([0xff, 0xd9])])).parse().tags;
+      exif = { ...exif, ...tags };
     } catch { /* Fall through to file timestamps. */ }
   }
   const dates = preserveDate && iso(preserveDate)
     ? { automaticDate: iso(preserveDate), dateSource: 'legacy' }
     : automaticDate(exif, source, importedAt);
+  const decoded = heic ? await require('./heic').decodeHeic(bytes) : null;
+  const deliveryInput = () => decoded
+    ? sharp(decoded.data, { raw: decoded.raw })
+    : sharp(bytes, { limitInputPixels: 100000000, animated: false }).rotate();
   let dimension = 2560;
   let output;
   do {
-    output = await sharp(bytes, { limitInputPixels: 100000000, animated: false }).rotate()
+    output = await deliveryInput()
       .resize({ width: dimension, height: dimension, fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 85, mozjpeg: true }).toBuffer({ resolveWithObject: true });
     dimension = Math.floor(dimension * 0.75);
@@ -90,8 +99,10 @@ async function processPhoto(s, { fileName, displayName, bytes, source = {}, impo
   const version = crypto.createHash('sha256').update(bytes).digest('hex');
   const imageKey = `versions/${version}.jpg`;
   const originalKey = `${version}/original`;
-  await s.originals.set(originalKey, bytes, { metadata: { contentType: `image/${info.format}`, displayName } });
+  await s.originals.set(originalKey, bytes, { metadata: { contentType: heic ? 'image/heic' : `image/${info.format}`, displayName } });
   await s.images.set(imageKey, output.data, { metadata: { contentType: 'image/jpeg' } });
+  // Keep all parsed EXIF, including GPS coordinates, altitude and direction,
+  // for future location features even though delivery JPEGs omit metadata.
   const record = { fileName, displayName: displayName || fileName, status: 'published', version, imageKey, originalKey,
     width: output.info.width, height: output.info.height, blurhash, ...dates, createdDate: dates.automaticDate,
     importedAt, source, exifData: exif };

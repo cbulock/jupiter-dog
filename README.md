@@ -13,9 +13,13 @@ Use Node.js 22 (x64 on Windows; the existing Sharp package does not load in the 
 
 ## How photos reach the gallery
 
-There are two sources: files placed directly inside Dropbox's `/Jupiter Website` folder, and uploads through `/admin`. Admin uploads stay in Netlify and are not copied to Dropbox. Subfolders, videos, and HEIC are not imported.
+There are two sources: files placed directly inside Dropbox's `/Jupiter Website` folder, and uploads through `/admin`. Both accept JPEG, PNG, GIF, WebP, and HEIC/HEIF photos (including phone originals). Admin uploads stay in Netlify and are not copied to Dropbox. Subfolders and videos are not imported.
+
+HEIC/HEIF photos are decoded on the server with `libheif-js` and converted to JPEG for the gallery; visitors do not need HEIC support in their browser. The untouched original is retained privately. The primary still image is used, with container rotation applied and EXIF capture dates read before conversion. Live Photo videos and additional frames are not imported. Netlify must keep `libheif-js` external alongside Sharp so its bundled WebAssembly decoder is available to background functions.
 
 Both sources use the same processor. It reads EXIF if available, preserves a private original, auto-orients the image, and creates a JPEG gallery version (up to 2560 pixels and 4 MiB) with a matching preview and dimensions. GIF originals retain animation; the gallery shows a still frame. Photos may be up to 50 MiB and 100 megapixels.
+
+Location data is retained for future location features: the original keeps its embedded metadata, and the photo record's `exifData` stores parsed GPS coordinates, altitude, direction, and other available EXIF tags. GPS is saved even when the capture date is missing. Existing records retain their saved EXIF when adopted by Dropbox sync. Newly generated gallery JPEGs omit embedded EXIF, and public APIs omit raw EXIF; this does not remove location data from stored originals or photo records. Photos without GPS are not assigned an inferred location.
 
 The gallery reads completed metadata directly from Netlify Blobs. Adding photos or correcting dates does **not** trigger a deployment. The first page is rendered on the server with a runtime catalog cache that revalidates every 30 seconds; pagination has a separate 30-second edge cache. An already-open gallery retains its loaded collection until refreshed. Gallery cards use responsive Next.js images (Netlify Image CDN in production), with the first photo preloaded and later photos lazy-loaded.
 
@@ -56,7 +60,7 @@ For local HTTP/browser integration, build first, then run `node tests/helpers/ph
 Use an isolated Netlify test deployment to verify the actual platform integration:
 
 1. Configure isolated stores and test secrets; confirm sign-in, sign-out, and rejection of anonymous/cross-origin mutations.
-2. Upload EXIF-free JPEG/PNG and a photo larger than one chunk. Interrupt/reselect an upload and confirm it publishes only once.
+2. Upload EXIF-free JPEG/PNG, a portrait HEIC from a phone, and a photo larger than one chunk. Confirm the HEIC orientation and capture date, then import another HEIC through Dropbox. Interrupt/reselect an upload and confirm it publishes only once.
 3. Refresh the gallery after processing and verify the photo appears within 30 seconds without a deployment; check orientation, dimensions, and delivery.
 4. Correct a date, refresh the gallery, then reimport and confirm the correction survives. Clear the correction and verify the automatic date returns.
 5. Run audit and repair against test image-only records. Confirm signed webhook dispatch, background retries, and hourly cleanup in Netlify logs.

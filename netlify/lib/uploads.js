@@ -15,7 +15,7 @@ async function upload(s, id, now = Date.now()) {
 async function startUpload(s, data, now = Date.now()) {
   if (!validId(data.id)) fail('Invalid upload ID');
   if (!Number.isInteger(data.size) || data.size < 1 || data.size > MAX_BYTES) fail('Photos must be no larger than 50 MiB');
-  if (typeof data.name !== 'string' || data.name.length > 255 || !/\.(jpe?g|png|gif|webp)$/i.test(data.name)) fail('Use JPEG, PNG, GIF, or WebP photos');
+  if (typeof data.name !== 'string' || data.name.length > 255 || !/\.(jpe?g|png|gif|webp|heic|heif)$/i.test(data.name)) fail('Use JPEG, PNG, GIF, WebP, or HEIC/HEIF photos');
   if (!/^[a-f0-9]{64}$/.test(data.digest || '')) fail('Photo checksum is required');
   const existing = await json(s.uploads, `${data.id}/manifest.json`);
   if (existing) {

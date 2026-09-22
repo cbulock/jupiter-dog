@@ -21,7 +21,7 @@ async function listPhotos(dropbox) {
   let page = (await dropbox.filesListFolder({ path: '/Jupiter Website' })).result;
   const files = [];
   while (true) {
-    files.push(...page.entries.filter((file) => file['.tag'] === 'file' && /\.(jpe?g|png|gif|webp)$/i.test(file.name)));
+    files.push(...page.entries.filter((file) => file['.tag'] === 'file' && /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(file.name)));
     if (!page.has_more) break;
     page = (await dropbox.filesListFolderContinue({ cursor: page.cursor })).result;
   }

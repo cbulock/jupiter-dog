@@ -120,7 +120,7 @@ export default function PhotoManager() {
     for (const [index, file] of selected.entries()) {
       let resumeKey;
       try {
-        if (!/\.(jpe?g|png|gif|webp)$/i.test(file.name) || file.size > 50 * 1024 * 1024 || !file.size) throw new Error('Choose a JPEG, PNG, GIF, or WebP photo up to 50 MiB.');
+        if (!/\.(jpe?g|png|gif|webp|heic|heif)$/i.test(file.name) || file.size > 50 * 1024 * 1024 || !file.size) throw new Error('Choose a JPEG, PNG, GIF, WebP, or HEIC/HEIF photo up to 50 MiB.');
         update(index, 'Preparing…');
         const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()))).map((b) => b.toString(16).padStart(2, '0')).join('');
         const storageKey = `jupiter-upload-${digest}-${file.name}-${file.lastModified}`;
@@ -159,8 +159,8 @@ export default function PhotoManager() {
         <label>Admin password<input type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} /></label>
         <button disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button></form> : <>
         <section className={styles.panel} aria-labelledby="upload-title"><h2 id="upload-title">Add a little more Jupiter</h2><p>Choose photos from your phone or computer. They’ll appear in the gallery when processing finishes.</p>
-          <label className={styles.fileLabel}>Choose photos<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple disabled={uploading} onChange={(event) => { uploadFiles(event.target.files); event.target.value = ''; }} /></label>
-          <p className={styles.caption}>JPEG, PNG, GIF, or WebP · Up to 50 MiB each. Interrupted upload? Select the same file again within 24 hours to resume.</p>
+          <label className={styles.fileLabel}>Choose photos<input type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,.heic,.heif" multiple disabled={uploading} onChange={(event) => { uploadFiles(event.target.files); event.target.value = ''; }} /></label>
+          <p className={styles.caption}>JPEG, PNG, GIF, WebP, or HEIC/HEIF · Up to 50 MiB each. Interrupted upload? Select the same file again within 24 hours to resume.</p>
           {progress.length > 0 && <ul className={styles.progress} aria-live="polite">{progress.map((item, index) => <li key={index}><span>{item.name}</span><strong>{item.status}</strong></li>)}</ul>}
         </section>
         <section className={styles.panel} aria-labelledby="collection-title"><h2 id="collection-title">Collection tools</h2>

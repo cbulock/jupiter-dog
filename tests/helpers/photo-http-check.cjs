@@ -77,7 +77,31 @@ async function main() {
   assert.equal(automatic.data.createdDate, '2017-04-05T12:00:00.000Z');
   const audit = await (await admin('audit')).json();
   assert.ok(audit.complete.includes(photo.fileName));
+  const heic = require('node:fs').readFileSync(require('node:path').join(__dirname, '../fixtures/iphone.heic'));
+  const heicId = crypto.randomUUID();
+  const heicStart = await admin('upload-start', { id: heicId, name: 'phone.HEIC', size: heic.length,
+    digest: crypto.createHash('sha256').update(heic).digest('hex'), lastModified: Date.now() });
+  assert.equal(heicStart.status, 200);
+  const heicManifest = await heicStart.json();
+  assert.equal((await admin('upload-chunk', heic, 'PUT', `&id=${heicId}&index=0`)).status, 200);
+  assert.equal((await admin('upload-complete', { id: heicId })).status, 202);
+  const heicStarted = Date.now();
+  let heicStatus;
+  do {
+    heicStatus = await (await admin('upload-status', undefined, 'GET', `&id=${heicId}`)).json();
+    if (heicStatus.job?.status === 'error') throw new Error(heicStatus.job.error);
+    if (heicStatus.job?.status === 'published') break;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  } while (Date.now() - heicStarted < 30000);
+  assert.equal(heicStatus.job.status, 'published');
+  const heicDetail = await (await fetch(`${base}/api/image/details?image=${heicManifest.fileName}`)).json();
+  assert.equal(heicDetail.data.createdDate, '2019-08-21T10:57:23.000Z');
+  const heicDelivery = await fetch(`${base}/.netlify/functions/get-image?name=${heicManifest.fileName}&v=${heicDetail.data.version}`);
+  assert.equal(heicDelivery.status, 200); assert.equal(heicDelivery.headers.get('content-type'), 'image/jpeg');
+  const heicInfo = await sharp(Buffer.from(await heicDelivery.arrayBuffer())).metadata();
+  assert.equal(heicInfo.format, 'jpeg'); assert.equal(heicInfo.width, 2560); assert.equal(heicInfo.height, 1920);
+  assert.equal(heicInfo.exif, undefined);
   assert.equal((await admin('logout', {})).status, 200);
-  console.log(`HTTP integration passed: upload, resume, processing, gallery delivery, correction, reset and audit (${Date.now() - started}ms).`);
+  console.log(`HTTP integration passed: upload, resume, processing, gallery delivery, correction, reset, audit and iPhone HEIC (${Date.now() - started}ms).`);
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });
