@@ -1,17 +1,8 @@
-.imageWrapper {
-  height: fit-content;
-  margin: 16px;
-  padding: 16px;
-  background: var(--light-color);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-
-  &:hover {
-    cursor: pointer;
-    transform: scale(1.05);
-    box-shadow: 8px 8px 20px 0px rgba(0, 0, 0, 0.75);
-  }
-}
-
-.image {
-  border-radius: 4px;
-}
+.card { display: block; padding: 8px 8px 0; width: 100%; text-align: left; border: 1px solid #e8e2d6; border-radius: 14px; background: #fffdf8; color: var(--ink); box-shadow: 0 3px 6px #25251f04; transition: transform .2s, box-shadow .2s; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px #25251f0d; }
+.photo { display: block; position: relative; overflow: hidden; border-radius: 8px; }
+.expand { position: absolute; bottom: 12px; right: 12px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--ink); background: var(--cream); font-size: 24px; opacity: 0; transform: translateY(5px); transition: opacity .2s, transform .2s; }
+.card:hover .expand, .card:focus-visible .expand { opacity: 1; transform: translateY(0); }
+.caption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 5px; font-size: 11px; font-weight: 500; color: var(--muted); }
+.number { color: var(--teal); font-size: 10px; letter-spacing: 1px; }
+@media (hover: none) { .expand { opacity: 1; transform: none; } }

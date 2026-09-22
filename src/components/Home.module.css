@@ -1,6 +1,69 @@
-.imageContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
+.intro { display: grid; grid-template-columns: 1.55fr 1fr; align-items: center; gap: 32px; padding: 42px 0 40px; }
+.eyebrow { display: flex; gap: 9px; align-items: center; font-size: 10px; letter-spacing: 2.3px; font-weight: 700; margin-bottom: 20px; }
+.eyebrow span { color: var(--orange); font-size: 22px; line-height: 1; }
+.intro h1 { font-size: clamp(38px, 4.65vw, 65px); font-weight: 900; letter-spacing: -2.7px; line-height: 1.08; }
+.intro h1 > span { position: relative; color: var(--teal); display: inline-block; white-space: nowrap; }
+.intro h1 svg { position: absolute; width: 100%; height: 14px; left: 0; bottom: -10px; color: var(--orange); }
+.description { color: var(--muted); font-size: 16px; margin-top: 26px; }
+.meetLink { display: inline-flex; align-items: center; gap: 20px; font-size: 13px; font-weight: 600; text-decoration: none; margin-top: 20px; min-height: 36px; }
+.meetLink span { font-size: 21px; color: var(--orange); transition: transform .2s; }
+.meetLink:hover span { transform: translate(3px, -3px); }
+.portrait { position: relative; width: 320px; height: 305px; justify-self: center; }
+.portraitCircle { position: absolute; width: 265px; height: 265px; background: #f2e5c7; border-radius: 50%; bottom: 10px; left: 24px; }
+.dog { position: absolute; width: 300px; height: 300px; object-fit: contain; bottom: 6px; left: 10px; transform: rotate(-5deg); filter: drop-shadow(0 7px 0 #fff8ec); }
+.spark { position: absolute; left: 0; top: 70px; color: var(--orange); font-size: 49px; transform: rotate(15deg); }
+.hello { position: absolute; right: -4px; top: -7px; font-family: var(--font-hand); font-size: 32px; transform: rotate(8deg); }
+.hello svg { width: 60px; height: 45px; display: block; margin-left: 20px; }
+.sticker { position: absolute; right: -12px; bottom: 8px; display: grid; place-content: center; text-align: center; border-radius: 50%; width: 92px; height: 92px; background: var(--yellow); transform: rotate(13deg); border: 1px dashed var(--ink); outline: 5px solid var(--yellow); font-size: 11px; line-height: 1.5; }
+.sticker strong { font-family: var(--font-heading); font-size: 16px; }
+.gallery { padding-top: 24px; border-top: 1px solid var(--line); }
+.galleryHeading { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+.galleryHeading h2 { font-weight: 900; font-size: 27px; letter-spacing: -1px; }
+.galleryHeading h2 > span { color: var(--orange); }
+.galleryNote { color: var(--muted); font-family: var(--font-hand); font-size: 22px; transform: rotate(-3deg); }
+.sort { display: flex; align-items: center; gap: 9px; margin-left: auto; font-size: 11px; color: var(--muted); }
+.sort span { color: var(--teal); font-size: 18px; }
+.imageContainer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 30px 24px; }
+@media (max-width: 1000px) {
+  .intro { gap: 16px; grid-template-columns: 1.6fr 1fr; }
+  .portrait { width: 240px; height: 260px; }
+  .portraitCircle { width: 210px; height: 210px; left: 10px; }
+  .dog { width: 240px; height: 240px; left: 0; }
+  .sticker { width: 74px; height: 74px; right: 0; }
+  .hello { right: 8px; font-size: 27px; }
+  .spark { font-size: 34px; }
+  .imageContainer { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 18px; }
+  .galleryNote { display: none; }
+}
+@media (max-width: 700px) {
+  .intro { padding: 28px 0; gap: 12px; grid-template-columns: 1fr 115px; }
+  .intro h1 { font-size: clamp(28px, 5.8vw, 40px); letter-spacing: -1.3px; }
+  .eyebrow { font-size: 8px; letter-spacing: 1.2px; margin-bottom: 13px; gap: 6px; }
+  .eyebrow span { font-size: 16px; }
+  .description { font-size: 12px; margin-top: 22px; }
+  .meetLink { font-size: 11px; gap: 8px; margin-top: 8px; }
+  .portrait { width: 115px; height: 170px; }
+  .dog { width: 135px; height: 135px; max-width: none; left: -12px; bottom: 16px; }
+  .portraitCircle { width: 110px; height: 110px; left: 0; bottom: 20px; }
+  .hello { font-size: 23px; right: 8px; top: -14px; }
+  .hello svg { width: 35px; height: 30px; }
+  .sticker { width: 56px; height: 56px; font-size: 8px; bottom: 3px; right: 0; outline-width: 3px; }
+  .sticker strong { font-size: 11px; }
+  .spark { font-size: 24px; left: -7px; top: 36px; }
+  .gallery { padding-top: 20px; }
+  .galleryHeading { gap: 10px; margin-bottom: 20px; }
+  .galleryHeading h2 { font-size: 23px; }
+  .sort { font-size: 10px; gap: 5px; }
+}
+@media (max-width: 479px) {
+  .imageContainer { grid-template-columns: 1fr; gap: 24px; }
+  .intro { grid-template-columns: minmax(0, 1fr) 88px; }
+  .portrait { width: 88px; }
+  .dog { width: 106px; height: 106px; left: -12px; bottom: 26px; }
+  .portraitCircle { width: 86px; height: 86px; left: 0; bottom: 30px; }
+  .hello { top: 5px; }
+  .sticker { width: 48px; height: 48px; bottom: 15px; }
+  .sticker strong { font-size: 10px; }
+  .spark { left: -9px; top: 55px; }
+  .intro h1 { font-size: clamp(25px, 6.7vw, 31px); }
 }

@@ -1,26 +1,36 @@
-'use client';
+"use client";
 
-import styles from "./Paw.module.scss";
-import { useSignals } from "@preact/signals-react/runtime";
-import clsx from "clsx";
-import { scaleTitlebar } from "@/state";
+import { useRef, useState, useEffect } from "react";
 import PawImage from "@/assets/paw.svg";
+import styles from "./Paw.module.scss";
 
-const handleClick = () => {
-  const bark = new Audio("bark.mp3");
-  bark.play();
-};
-
-const Paw = () => {
-  useSignals();
+export default function Paw() {
+  const audio = useRef(null);
+  const timer = useRef(null);
+  const [message, setMessage] = useState("");
+  useEffect(() => () => {
+    clearTimeout(timer.current);
+    audio.current?.pause();
+  }, []);
+  async function bark() {
+    audio.current ??= new Audio("/bark.mp3");
+    audio.current.currentTime = 0;
+    try {
+      await audio.current.play();
+      setMessage("Woof!");
+    } catch {
+      setMessage("Sound couldn’t play. Try again!");
+    }
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setMessage(""), 2400);
+  }
   return (
-    <div
-      onClick={handleClick}
-      className={clsx(styles.wrapper, `scale-${scaleTitlebar.value}`)}
-    >
-      <PawImage className={styles.svg} />
+    <div className={styles.wrapper}>
+      <span className={styles.hint} aria-hidden="true">say hello</span>
+      <button className={styles.button} onClick={bark} aria-label="Say hello — play Jupiter’s bark" title="Give me a boop!">
+        <PawImage aria-hidden="true" />
+      </button>
+      <span className={styles.message} role="status">{message}</span>
     </div>
   );
-};
-
-export default Paw;
+}

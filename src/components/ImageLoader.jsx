@@ -1,52 +1,40 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSignals } from "@preact/signals-react/runtime";
-import { useIntersectionObserver } from "@uidotdev/usehooks";
+import { imageList, modalImage, galleryLoading, galleryError, galleryHasMore, loadMoreImages } from "@/state";
+import styles from "./ImageLoader.module.css";
 
-import { imageList } from "@/state";
-
-const ImageLoader = () => {
+export default function ImageLoader() {
   useSignals();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [nextPage, setNextPage] = useState(1);
-  const [hasMoreResults, setHasMoreResults] = useState(true);
-
-  const [observerRef, intersectionObserverEntry] = useIntersectionObserver({
-    threshold: 0,
-    rootMargin: "30%",
-  });
-
+  const sentinel = useRef(null);
+  const loading = galleryLoading.value;
+  const error = galleryError.value;
+  const hasMore = galleryHasMore.value;
+  const viewerOpen = Boolean(modalImage.value);
   useEffect(() => {
-    const loadImages = async ({ page }) => {
-      if (!isLoading && hasMoreResults) {
-        setIsLoading(true);
-        try {
-          const response = await fetch(
-            `/api/image/list?page=${page}&pageSize=8`
-          );
-          if (!response.ok) {
-            throw new Error(`Failed to load images: ${response.status}`);
-          }
-          const data = await response.json();
-          imageList.value = [...imageList.value, ...data.data];
-          setHasMoreResults(data.hasNextPage);
-          setNextPage(page + 1);
-        } catch (error) {
-          console.error("Error loading images:", error);
-          setHasMoreResults(false);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
+    if (viewerOpen || loading || error || !hasMore) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) loadMoreImages();
+    }, { rootMargin: "300px" });
+    if (sentinel.current) observer.observe(sentinel.current);
+    return () => observer.disconnect();
+  }, [loading, error, hasMore, viewerOpen]);
 
-    if (!intersectionObserverEntry?.isIntersecting) return;
-    loadImages({ page: nextPage });
-  }, [hasMoreResults, intersectionObserverEntry, isLoading, nextPage]);
-
-  return <div ref={observerRef} />;
-};
-
-export default ImageLoader;
+  return (
+    <div className={styles.loader} ref={sentinel}>
+      {loading && imageList.value.length === 0 && (
+        <div className={styles.skeletons} aria-hidden="true"><span /><span /><span /></div>
+      )}
+      <div role="status" aria-live="polite">
+        {loading && <p className={styles.loading}><span aria-hidden="true">✳</span> Fetching the good stuff…</p>}
+        {error && <p>{error}</p>}
+        {!loading && !error && !hasMore && (
+          <p className={styles.end}>{imageList.value.length ? "You’re all caught up. Good human." : "The camera roll is waiting for its first adventure."}<span aria-hidden="true"> ♡</span></p>
+        )}
+      </div>
+      {error && <button onClick={loadMoreImages}>Try again <span aria-hidden="true">↻</span></button>}
+      {!loading && !error && hasMore && <button onClick={loadMoreImages}>More Jupiter <span aria-hidden="true">↓</span></button>}
+    </div>
+  );
+}

@@ -1,43 +1,21 @@
-"use client";
+import styles from "./BreedChart.module.css";
 
-import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Legend, Tooltip } from "chart.js";
+const breeds = [
+  { name: "Beagle", percent: 47, color: "var(--teal)" },
+  { name: "Chihuahua", percent: 35, color: "var(--orange)" },
+  { name: "Rat Terrier", percent: 10, color: "#a88835" },
+  { name: "Supermutt", percent: 8, color: "#84768c" },
+];
 
-ChartJS.register(ArcElement, Legend, Tooltip);
-
-const breedData = {
-  labels: ["Beagle", "Chihuahua", "Rat Terrier", "Supermutt"],
-  datasets: [
-    {
-      label: "Breed",
-      data: [47, 35, 10, 8],
-      backgroundColor: [
-        "rgb(255, 99, 132)",
-        "rgb(54, 162, 235)",
-        "rgb(255, 205, 86)",
-        "purple",
-      ],
-    },
-  ],
-};
-
-const breedOptions = {
-  plugins: {
-    legend: {
-      labels: {
-        color: "#fcab10ff",
-      },
-    },
-    tooltip: {
-      callbacks: {
-        label: function (context) {
-          return ` ${context.formattedValue}%`;
-        },
-      },
-    },
-  },
-};
-
-const BreedChart = () => <Pie data={breedData} options={breedOptions} />;
-
-export default BreedChart;
+export default function BreedChart() {
+  return (
+    <ul className={styles.breeds}>
+      {breeds.map(({ name, percent, color }) => (
+        <li key={name}>
+          <div className={styles.label}><span>{name}</span><strong>{percent}%</strong></div>
+          <div className={styles.track} aria-hidden="true"><span style={{ width: `${percent}%`, background: color }} /></div>
+        </li>
+      ))}
+    </ul>
+  );
+}

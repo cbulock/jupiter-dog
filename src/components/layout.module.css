@@ -1,16 +1,28 @@
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  top: 8px;
-  left: 0;
-  z-index: 2;
+.header { position: sticky; top: 0; z-index: 20; background: rgba(255, 248, 236, .96); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
+.headerInner { max-width: 1384px; margin: auto; padding: 18px 48px; display: flex; align-items: center; gap: 32px; }
+.brand { display: inline-flex; align-items: baseline; gap: 7px; text-decoration: none; font-family: var(--font-hand), cursive; font-size: 28px; font-weight: 400; line-height: 1.2; letter-spacing: 0; white-space: nowrap; }
+.brandName { font-size: 1.25em; }
+.brandDot { color: var(--orange); }
+/* Twinkle Star has one weight; a fine stroke gives the wordmark a little more ink. */
+.brand, .footer > a { -webkit-text-stroke: .3px currentColor; }
+.nav { margin-left: auto; display: flex; align-items: center; gap: 30px; }
+.nav a { padding: 12px 0; text-decoration: none; font-size: 14px; font-weight: 600; position: relative; }
+.nav a::after { content: ""; position: absolute; bottom: 3px; left: 0; width: 100%; height: 2px; background: var(--orange); transform: scaleX(0); transition: transform .2s; }
+.nav a[aria-current], .nav a:hover { color: var(--teal); }
+.nav a[aria-current]::after, .nav a:hover::after { transform: scaleX(1); }
+.main { max-width: 1384px; padding: 0 48px; margin: auto; min-height: calc(100svh - 220px); }
+.footer { max-width: 1288px; margin: 32px auto 0; padding: 28px 0 34px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 24px; color: var(--muted); font-size: 12px; }
+.footer a { color: var(--ink); font-family: var(--font-hand), cursive; font-weight: 400; font-size: 26px; text-decoration: none; }
+.footer a span { color: var(--orange); margin-left: 6px; }
+.footerNote { font-family: var(--font-hand); font-size: 20px; color: var(--teal); }
+.skipLink { position: fixed; left: 16px; top: -100px; z-index: 100; background: var(--cream); padding: 12px; }
+.skipLink:focus { top: 12px; }
+@media (max-width: 1400px) { .footer { margin-left: 48px; margin-right: 48px; } }
+@media (max-width: 700px) {
+  .headerInner { padding: 12px 20px; gap: 16px; flex-wrap: wrap; }
+  .brand { font-size: 25px; }
+  .nav { gap: 20px; order: 3; width: 100%; justify-content: center; border-top: 1px solid var(--line); padding-top: 4px; }
+  .main { padding: 0 20px; }
+  .footer { margin: 24px 20px 0; align-items: flex-start; flex-direction: column; gap: 12px; }
 }
-.main {
-  margin: 8px;
-}
-.titleContainer {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+@media (max-width: 400px) { .brand { font-size: 24px; } }

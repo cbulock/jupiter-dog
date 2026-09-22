@@ -1,60 +1,52 @@
-'use client';
+"use client";
 
-import NextImage from 'next/image'
-import styles from './Image.module.css';
-import clsx from "clsx";
-import { useState, useEffect } from "react";
-import { useIntersectionObserver } from "@uidotdev/usehooks";
+import NextImage from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { decode } from "blurhash";
+import clsx from "clsx";
+import styles from "./Image.module.css";
 
-const isDev = process.env.NODE_ENV === 'development';
-
-const Image = ({
-  alt = "",
-  blurhash,
-  src,
-  width,
-  height,
-  lazyLoad = false,
-  className,
-}) => {
-
-  const [backgroundImage, setBackgroundImage] = useState(null);
-  const [observerRef, intersectionObserverEntry] = useIntersectionObserver({
-    threshold: 0,
-    rootMargin: "20%",
-  });
-
+export default function Image({ alt = "", blurhash, src, width, height, lazyLoad = false, className, sizes, onError }) {
+  const [background, setBackground] = useState();
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const imageRef = useRef(null);
   useEffect(() => {
+    setLoaded(Boolean(imageRef.current?.complete && imageRef.current?.naturalWidth));
+    setFailed(false);
+    setBackground(undefined);
     if (!blurhash) return;
-    if (!intersectionObserverEntry?.isIntersecting || backgroundImage) return;
-    const pixels = decode(blurhash, width, height);
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = width;
-    canvas.height = height;
-    const imageData = ctx.createImageData(width, height);
-    imageData.data.set(pixels);
-    ctx.putImageData(imageData, 0, 0);
-
-    const imageURL = canvas.toDataURL();
-    setBackgroundImage(`url(${imageURL})`);
-  }, [backgroundImage, blurhash, width, height, intersectionObserverEntry]);
-
+    try {
+      // A tiny placeholder is sufficient; avoid decoding full-resolution canvases.
+      const pixels = decode(blurhash, 32, 32);
+      const canvas = document.createElement("canvas");
+      canvas.width = 32;
+      canvas.height = 32;
+      const context = canvas.getContext("2d");
+      context.putImageData(new ImageData(pixels, 32, 32), 0, 0);
+      setBackground(`url(${canvas.toDataURL()})`);
+    } catch {
+      // A malformed optional placeholder must not prevent the photo from loading.
+    }
+  }, [src, blurhash]);
   return (
-    <NextImage
-      loading={lazyLoad ? "lazy" : "eager"}
-      alt={alt}
-      src={src}
-      width={width}
-      height={height}
-      style={{ backgroundImage }}
-      ref={observerRef}
-      className={clsx(styles.image, className)}
-      unoptimized={isDev}
-    />
+    <span className={clsx(styles.frame, className)} style={{ aspectRatio: `${width} / ${height}`, backgroundImage: loaded || failed ? undefined : background }}>
+      {!failed ? (
+        <NextImage
+          ref={imageRef}
+          src={src} alt={alt} width={width} height={height}
+          sizes={sizes} loading={lazyLoad ? "lazy" : "eager"}
+          className={clsx(styles.image, loaded && styles.loaded)}
+          onLoad={() => setLoaded(true)} onError={() => { setFailed(true); onError?.(); }}
+          unoptimized={process.env.NODE_ENV === "development"}
+        />
+      ) : (
+        <span className={styles.failed} role="img" aria-label={`${alt} — unavailable`}>
+          <span aria-hidden="true">☁</span>
+          Photo taking a little nap.
+          <small>Please try again in a moment.</small>
+        </span>
+      )}
+    </span>
   );
-};
-
-export default Image;
+}

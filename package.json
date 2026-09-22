@@ -7,7 +7,8 @@
     "dev:netlify": "netlify dev",
     "build": "node ./scripts/generateImageList.js && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@netlify/blobs": "^7.3.0",

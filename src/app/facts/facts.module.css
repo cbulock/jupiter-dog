@@ -1,35 +1,37 @@
-.facts {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.header {
-  text-align: center;
-  padding: 20px 0;
-  color: var(--light-color);
-}
-
-.header img {
-  width: 150px;
-  border-radius: 50%;
-}
-
-.info {
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
-  color: var(--light-color);
-}
-
-.info div {
-  text-align: center;
-  padding: 10px;
-}
-
-.breedChart {
-  text-align: center;
-  color: var(--light-color);
-  max-width: 50%;
+.facts { padding: 30px 0 12px; }
+.back { display: inline-flex; gap: 12px; align-items: center; min-height: 44px; color: var(--muted); font-size: 12px; text-decoration: none; }
+.back:hover { color: var(--teal); }
+.profile { display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px; align-items: start; padding: 35px 0 55px; }
+.portrait { padding: 12px 12px 20px; background: #fffdf8; border: 1px solid var(--line); border-radius: 16px; position: relative; margin-top: 18px; box-shadow: 0 10px 30px #25251f07; }
+.portrait img { width: 100%; height: auto; border-radius: 9px; display: block; }
+.annotation { display: block; text-align: center; font-family: var(--font-hand); font-size: 28px; margin-top: 18px; color: var(--teal); transform: rotate(-3deg); }
+.star { position: absolute; top: -34px; left: -18px; color: var(--orange); font-size: 80px; transform: rotate(12deg); }
+.eyebrow { font-size: 10px; letter-spacing: 1.8px; font-weight: 700; color: var(--teal); margin-bottom: 12px; }
+.about h1 { font-size: clamp(40px, 4.7vw, 65px); line-height: 1.1; letter-spacing: -2.5px; font-weight: 900; }
+.about h1 > span { color: var(--orange); }
+.subtitle { font-family: var(--font-hand); font-size: 30px; color: var(--teal); margin-top: 10px; }
+.description { font-size: 14px; line-height: 1.8; color: var(--muted); margin-top: 16px; max-width: 430px; }
+.dates { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 26px 0; margin: 8px 0 24px; border-bottom: 1px solid var(--line); }
+.dates > div { position: relative; padding-left: 32px; }
+.dateIcon { position: absolute; left: 0; top: 0; font-size: 22px; color: var(--orange); }
+.dates h2 { font-size: 14px; margin-bottom: 6px; font-weight: 800; }
+.dates time { font-size: 12px; color: var(--muted); }
+.breedHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.breedHeading h2 { font-size: 21px; font-weight: 900; letter-spacing: -.5px; }
+.breedHeading > span { background: var(--yellow); border-radius: 25px; padding: 7px 12px; white-space: nowrap; font-size: 10px; font-weight: 600; transform: rotate(4deg); }
+.invitation { display: flex; align-items: center; justify-content: center; gap: 28px; padding: 28px; background: #eee9d9; border-radius: 14px; }
+.invitation > span { font-family: var(--font-hand); color: var(--teal); font-size: 25px; }
+.invitation a { font-size: 12px; font-weight: 600; text-decoration: none; padding: 12px 0; }
+.invitation a > span { color: var(--orange); margin-left: 16px; font-size: 18px; }
+@media (max-width: 1000px) { .profile { gap: 40px; } .breedHeading { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 700px) {
+  .facts { padding-top: 16px; }
+  .profile { grid-template-columns: 1fr; gap: 34px; padding: 16px 0 32px; }
+  .portrait { width: 85%; max-width: 400px; justify-self: center; margin-top: 8px; }
+  .about h1 { font-size: 46px; }
+  .about { padding: 0 4px; }
+  .annotation { font-size: 24px; }
+  .breedHeading { flex-direction: row; align-items: center; }
+  .breedHeading h2 { font-size: 20px; }
+  .invitation { flex-direction: column; text-align: center; gap: 8px; padding: 22px 12px; }
 }

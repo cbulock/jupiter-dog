@@ -1,46 +1,28 @@
-import styles from './ImageCard.module.scss';
-import { useSignals } from "@preact/signals-react/runtime";
-import Image from "@/components/Image";
-import { modalImage } from "@/state";
+import styles from "./ImageCard.module.scss";
+import Image from "./Image";
+import { modalImage, photoDate } from "@/state";
 
-const newImageSize = ({ width: originalWidth, height: originalHeight }) => {
-  const maxSize = 400;
-  let newWidth, newHeight;
-
-  if (originalWidth > originalHeight) {
-    // Width is the larger dimension
-    newWidth = maxSize;
-    newHeight = (originalHeight / originalWidth) * maxSize;
-  } else {
-    // Height is the larger dimension or they are equal
-    newHeight = maxSize;
-    newWidth = (originalWidth / originalHeight) * maxSize;
-  }
-
-  return { width: Math.round(newWidth), height: Math.round(newHeight) };
-};
-
-const ImageCard = ({ imageData, lazyLoad = true }) => {
-  useSignals();
-  const { blurhash, width, height, fileName } = imageData;
-  const newSizes = newImageSize({ width, height });
-
+export default function ImageCard({ imageData, index, lazyLoad = true }) {
+  const { blurhash, width, height, fileName, createdDate } = imageData;
+  const date = photoDate(createdDate);
   return (
-    <div
-      onClick={() => (modalImage.value = imageData)}
-      className={styles.imageWrapper}
+    <button
+      type="button" className={styles.card}
+      onClick={() => { modalImage.value = imageData; }}
+      aria-label={`Open photo ${index + 1} of Jupiter${date ? `, ${date}` : ""}`}
+      aria-haspopup="dialog"
     >
-      <Image
-        src={`/.netlify/functions/get-image?name=${fileName}`}
-        blurhash={blurhash}
-        width={newSizes.width}
-        height={newSizes.height}
-        lazyLoad={lazyLoad}
-        className={styles.image}
-        alt="Photo of Jupiter"
-      />
-    </div>
+      <span className={styles.photo}>
+        <Image src={`/.netlify/functions/get-image?name=${encodeURIComponent(fileName)}`}
+          blurhash={blurhash} width={width} height={height} lazyLoad={lazyLoad}
+          sizes="(max-width: 479px) calc(100vw - 56px), (max-width: 700px) 45vw, (max-width: 1000px) 44vw, 30vw"
+          alt={`Jupiter${date ? ` on ${date}` : ""}`} />
+        <span className={styles.expand} aria-hidden="true">↗</span>
+      </span>
+      <span className={styles.caption}>
+        {date ? <time dateTime={createdDate}>{date}</time> : <span>A moment with Jupiter</span>}
+        <span className={styles.number} aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+      </span>
+    </button>
   );
-};
-
-export default ImageCard;
+}
